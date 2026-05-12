@@ -1,0 +1,20 @@
+# Conda
+envs/
+.conda/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# Environment
+.env
+
+# Data
+data/*.csv
+data/*.json
+
+# OS
+.DS_Store
+Thumbs.db 
