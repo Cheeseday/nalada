@@ -10,6 +10,7 @@ __pycache__/
 
 # Environment
 .env
+.vscode
 
 # Data
 data/*.csv
