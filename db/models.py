@@ -103,6 +103,10 @@ class Urbanization(Base):
     urban_population_total  = Column(Float)   # absolute number
     urban_growth_rate       = Column(Float)   # annual % change
     population_density      = Column(Float)   # people per km²
+    urban_land_area_km2     = Column(Float)   # urban land area (sq. km)
+    electricity_access_pct  = Column(Float)   # access to electricity, urban (% of urban population)
+    slum_population_pct     = Column(Float)   # population living in slums (% of urban population)
+    pm25_exposure           = Column(Float)   # PM2.5 air pollution, mean annual exposure (micrograms per cubic meter)
 
     source                  = Column(String(50), default="WorldBank")
 
