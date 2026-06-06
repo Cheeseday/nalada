@@ -13,12 +13,14 @@ bleach @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_ble
 blinker==1.9.0
 Brotli @ file:///D:/bld/brotli-split_1764017006836/work
 cached-property @ file:///home/conda/feedstock_root/build_artifacts/cached_property_1615209429212/work
-certifi @ file:///home/conda/feedstock_root/build_artifacts/certifi_1776866578774/work/certifi
+certifi @ file:///home/conda/feedstock_root/build_artifacts/certifi_1779285033994/work/certifi
 cffi @ file:///D:/bld/cffi_1761202893018/work
 charset-normalizer @ file:///home/conda/feedstock_root/build_artifacts/charset-normalizer_1775127091311/work
 click==8.4.0
 colorama @ file:///home/conda/feedstock_root/build_artifacts/colorama_1733218098505/work
 comm @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_comm_1753453984/work
+contourpy @ file:///D:/bld/bld/rattler-build_contourpy_1769155974/work
+cycler @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_cycler_1764466758/work
 debugpy @ file:///D:/bld/bld/rattler-build_debugpy_1769745017/work
 decorator @ file:///home/conda/feedstock_root/build_artifacts/decorator_1740384970518/work
 defusedxml @ file:///home/conda/feedstock_root/build_artifacts/defusedxml_1615232257335/work
@@ -26,6 +28,7 @@ exceptiongroup @ file:///home/conda/feedstock_root/build_artifacts/exceptiongrou
 executing @ file:///home/conda/feedstock_root/build_artifacts/executing_1756729339227/work
 fastjsonschema @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_python-fastjsonschema_1755304154/work/dist
 Flask==3.1.3
+fonttools @ file:///D:/bld/fonttools_1778770294641/work
 fqdn @ file:///home/conda/feedstock_root/build_artifacts/fqdn_1733327382592/work/dist
 greenlet==3.5.0
 h11 @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_h11_1767729720/work
@@ -61,10 +64,14 @@ jupyterlab @ file:///home/conda/feedstock_root/build_artifacts/jupyterlab_177748
 jupyterlab_pygments @ file:///home/conda/feedstock_root/build_artifacts/jupyterlab_pygments_1733328101776/work
 jupyterlab_server @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_jupyterlab_server_1761145478/work
 jupyterlab_widgets @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_jupyterlab_widgets_1762267481/work/python/jupyterlab_widgets
+kiwisolver @ file:///D:/bld/bld/rattler-build_kiwisolver_1773067062/work
 lark @ file:///home/conda/feedstock_root/build_artifacts/lark_1761596826058/work
 MarkupSafe @ file:///D:/bld/markupsafe_1772444956616/work
+matplotlib==3.10.9
 matplotlib-inline @ file:///home/conda/feedstock_root/build_artifacts/matplotlib-inline_1778264321245/work
 mistune @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_mistune_1777824616/work
+munkres==1.1.4
+narwhals @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_narwhals_1780672242/work
 nbclient @ file:///home/conda/feedstock_root/build_artifacts/nbclient_1766485478710/work
 nbconvert @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_nbconvert-core_1775615493/work
 nbformat @ file:///home/conda/feedstock_root/build_artifacts/nbformat_1733402752141/work
@@ -77,7 +84,9 @@ packaging @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_
 pandas @ file:///D:/bld/bld/rattler-build_pandas_1778602666/work
 pandocfilters @ file:///home/conda/feedstock_root/build_artifacts/pandocfilters_1631603243851/work
 parso @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_parso_1777722955/work
+pillow @ file:///D:/bld/bld/rattler-build_pillow_1775060119/work
 platformdirs @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_platformdirs_1775741140/work
+plotly @ file:///home/conda/feedstock_root/build_artifacts/plotly_1780554762149/work
 prometheus_client @ file:///home/conda/feedstock_root/build_artifacts/prometheus_client_1775771358777/work
 prompt_toolkit @ file:///home/conda/feedstock_root/build_artifacts/prompt-toolkit_1756321756983/work
 psutil @ file:///D:/bld/bld/rattler-build_psutil_1769678166/work
@@ -87,6 +96,8 @@ pycparser @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_
 pydantic==2.13.4
 pydantic_core==2.46.4
 Pygments @ file:///home/conda/feedstock_root/build_artifacts/pygments_1774796700044/work
+pyparsing @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_pyparsing_1769003998/work
+PySide6==6.11.1
 PySocks @ file:///D:/bld/pysocks_1733217287171/work
 python-dateutil @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_python-dateutil_1751104122/work
 python-dotenv==1.2.2
@@ -102,6 +113,7 @@ rfc3986-validator @ file:///home/conda/feedstock_root/build_artifacts/rfc3986-va
 rfc3987-syntax @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_rfc3987-syntax_1752876729/work
 rpds-py @ file:///D:/bld/bld/rattler-build_rpds-py_1764543026/work
 Send2Trash @ file:///D:/bld/bld/rattler-build_send2trash_1770937641/work
+shiboken6==6.11.1
 six @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_six_1753199211/work
 sniffio @ file:///home/conda/feedstock_root/build_artifacts/sniffio_1762941432086/work
 soupsieve @ file:///home/conda/feedstock_root/build_artifacts/soupsieve_1769034399263/work
@@ -117,6 +129,7 @@ typing-inspection==0.4.2
 typing_extensions @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_typing_extensions_1756220668/work
 typing_utils @ file:///home/conda/feedstock_root/build_artifacts/typing_utils_1733331286120/work
 tzdata @ file:///home/conda/feedstock_root/build_artifacts/python-tzdata_1777068919240/work
+unicodedata2 @ file:///D:/bld/unicodedata2_1770908975304/work
 uri-template @ file:///home/conda/feedstock_root/build_artifacts/uri-template_1733323593477/work/dist
 urllib3 @ file:///home/conda/feedstock_root/build_artifacts/urllib3_1778188571305/work
 wbgapi==1.0.14
