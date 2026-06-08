@@ -22,16 +22,17 @@ their emissions to Asia?
    have in common?
 
 ## Data Sources
-- OWID CO2 Data         → emissions, energy, GDP (global, 1750-2024)
-- World Bank API        → urbanization %, population density, urban growth
-- Eurostat Urban Audit  → city-level detail (Europe, Sprint 3+)
+- OWID CO2 Data         - emissions, energy, GDP (global, 1750-2024)
+- World Bank API        - urbanization %, population density, urban growth
+- Eurostat Urban Audit  - city-level detail (Europe, Sprint 3+)
 
 ## Key Metrics
-- `co2_per_gdp` - territorial emissions intensity
-- `consumption_co2_per_gdp` - real decoupling metric
+- `co2_total` - territorial emissions intensity
+- `consumption_co2` - real decoupling metric
 - `trade_co2` - fake decoupling detector
 - `urban_population_pct` - urbanization level
-- `co2_per_unit_energy` - how clean is the energy grid
+- `gdp_per_capita` - country wealth index
+- `pm25_exposure` - pollution of the urban atmosphere
 
 ## Tech Stack
 PostgreSQL + SQLAlchemy + Python + Pandas
