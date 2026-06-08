@@ -20,3 +20,6 @@ data/*.json
 .DS_Store
 Thumbs.db 
 .ssh
+
+# For own diagnostic purposes:
+analysis/06_eurostat_coverage_check.ipynb
