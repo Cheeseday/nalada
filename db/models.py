@@ -5,7 +5,7 @@ from db.database import Base
 
 class Country(Base):
     """
-    Master table — joining key across all sources.
+    Master table - joining key across all sources.
     iso_code is the universal link between OWID, World Bank, Eurostat.
     """
     __tablename__ = "countries"
@@ -19,16 +19,17 @@ class Country(Base):
 
     emissions    = relationship("Emission", back_populates="country")
     urbanization = relationship("Urbanization", back_populates="country")
+    cities       = relationship("City", back_populates="country")
 
 
 class Emission(Base):
     """
-    Core of the decoupling analysis — from OWID CO2 dataset.
+    Core of the decoupling analysis - from OWID CO2 dataset.
     
     Key decoupling columns:
     - co2_per_gdp: territorial emissions intensity (how much CO2 per $ of GDP)
-    - consumption_co2: the "honest" number — includes imported emissions
-    - consumption_co2_per_gdp: consumption-based intensity (decoupling test)
+    - consumption_co2: the "honest" number - includes imported emissions
+    - consumption_co2_per_capita: consumption-based intensity (decoupling test)
     
     Energy mix columns:
     - coal_co2, gas_co2, oil_co2: breakdown of emission sources
@@ -40,40 +41,32 @@ class Emission(Base):
     country_id               = Column(Integer, ForeignKey("countries.id"), nullable=False)
     year                     = Column(Integer, nullable=False)
 
-    # --- Territorial emissions (what countries report) ---
     co2_total                = Column(Float)   # million tonnes
     co2_per_capita           = Column(Float)   # tonnes per person
     co2_per_gdp              = Column(Float)   # kg per $1000 GDP
 
-    # --- Consumption-based emissions (the honest number) ---
     consumption_co2          = Column(Float)   # million tonnes
     consumption_co2_per_capita = Column(Float)
-    consumption_co2_per_gdp  = Column(Float)   # key decoupling metric
+    consumption_co2_per_gdp  = Column(Float)
 
-    # --- Energy mix (transition story) ---
     energy_per_capita        = Column(Float)   # kWh per person
     energy_per_gdp           = Column(Float)   # kWh per $
     coal_co2                 = Column(Float)   # million tonnes from coal
     gas_co2                  = Column(Float)   # million tonnes from gas
     oil_co2                  = Column(Float)   # million tonnes from oil
-    renewables_share_energy  = Column(Float)   # % of energy from renewables
+    renewables_share_energy  = Column(Float)
 
-    # --- Greenhouse gases beyond CO2 ---
     methane                  = Column(Float)   # million tonnes CO2-equivalent
     ghg_per_capita           = Column(Float)   # total GHG per person
 
-    # Trade / fake decoupling detector
     trade_co2               = Column(Float)  # net embedded in trade, Mt
     trade_co2_share         = Column(Float)  # % of total emissions
 
-    # Temperature impact
     temperature_change_from_co2  = Column(Float)  # °C
     share_of_temperature_change_from_ghg = Column(Float)  # % of global warming
 
-    # Energy cleanliness
-    co2_per_unit_energy     = Column(Float)  # kg CO2 per kWh — how dirty is the grid
+    co2_per_unit_energy     = Column(Float)  # kg CO2 per kWh
 
-    # --- Economic context (from OWID, sourced from Maddison DB) ---
     gdp                      = Column(Float)   # international-$ 2011 prices
     population               = Column(Float)
 
@@ -88,8 +81,7 @@ class Emission(Base):
 
 class Urbanization(Base):
     """
-    Urbanization layer — from World Bank API.
-    Answers: does urban structure affect decoupling success?
+    Urbanization layer - from World Bank API.
     
     Joined to emissions via country.iso_code.
     """
@@ -117,62 +109,68 @@ class Urbanization(Base):
     country = relationship("Country", back_populates="urbanization")
 
 
+class City(Base):
+    """
+    Master city table - from Eurostat Urban Audit (urb_cpop1).
+    One row per core city (type 'C'). Joins to countries via country_id.
+
+    City codes like 'DE001C':
+      first 2 chars = ISO2 country code
+      middle 3 digits = city number
+      last char = type: C=core, K=greater city, F=functional urban area
+    We store core cities only.
+    """
+    __tablename__ = "cities"
+
+    id          = Column(Integer, primary_key=True)
+    city_code   = Column(String(10), unique=True, nullable=False)  # e.g. "DE001C"
+    name        = Column(String(150))                              # e.g. "Berlin"
+    country_id  = Column(Integer, ForeignKey("countries.id"), nullable=False)
+    population  = Column(Float)   # latest available from urb_cpop1
+
+    country     = relationship("Country", back_populates="cities")
+    stats       = relationship("CityStats", back_populates="city")
 
 
+class CityStats(Base):
+    """
+    City-level indicators - merged from Eurostat urb_ctran (transport)
+    and urb_cenv (environment). One row per city per year.
 
+    Transport indicators (urb_ctran):
+    - cars_per_1000:            car dependency = emissions proxy
+    - bicycle_network_km:       green transport infrastructure
+    - avg_journey_to_work_min:  urban sprawl indicator
+    - public_transport_cost_eur: accessibility
 
+    Environment indicators (urb_cenv):
+    - green_urban_area_pct:     urban quality / green space
+    - municipal_waste_1000t:    consumption proxy
+    - wastewater_treatment_pct: infrastructure quality
+    - industrial_land_pct:      urban structure / land use
+    """
+    __tablename__ = "city_stats"
 
+    id          = Column(Integer, primary_key=True)
+    city_id     = Column(Integer, ForeignKey("cities.id"), nullable=False)
+    year        = Column(Integer, nullable=False)
 
+    # Transport (urb_ctran)
+    cars_per_1000               = Column(Float)   # TT1057I
+    bicycle_network_km          = Column(Float)   # TT1079V
+    avg_journey_to_work_min     = Column(Float)   # TT1019V
+    public_transport_cost_eur   = Column(Float)   # TT1080V
 
+    # Environment (urb_cenv)
+    green_urban_area_pct        = Column(Float)   # EN5205V
+    municipal_waste_1000t       = Column(Float)   # EN4008V
+    wastewater_treatment_pct    = Column(Float)   # EN3011V
+    industrial_land_pct         = Column(Float)   # EN5202V
 
+    source  = Column(String(50), default="Eurostat")
 
+    __table_args__ = (
+        UniqueConstraint('city_id', 'year', name='uq_city_stats_city_year'),
+    )
 
-
-"""
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
-from sqlalchemy.orm import relationship
-from db.database import Base
-
-class Country(Base):
-    __tablename__ = "countries"
-
-    id         = Column(Integer, primary_key=True)
-    name       = Column(String(100), nullable=False)
-    iso_code   = Column(String(3), unique=True, nullable=False)
-    continent  = Column(String(50))
-    region     = Column(String(100))  # "Western Europe", "Eastern Europe", etc.
-
-    # Сувязі (для зваротнага доступу)
-    emissions     = relationship("Emission", back_populates="country")
-    urbanization  = relationship("Urbanization", back_populates="country")
-
-
-class Emission(Base):
-    __tablename__ = "emissions"
-
-    id              = Column(Integer, primary_key=True)
-    country_id      = Column(Integer, ForeignKey("countries.id"), nullable=False)
-    year            = Column(Integer, nullable=False)
-    co2_total       = Column(Float)   # млн тон
-    co2_per_capita  = Column(Float)   # тон/чал
-    co2_per_gdp     = Column(Float)   # кг/$1000 ВУП
-    source          = Column(String(50), default="OWID")
-
-    country = relationship("Country", back_populates="emissions")
-
-
-class Urbanization(Base):
-    __tablename__ = "urbanization"
-
-    id                    = Column(Integer, primary_key=True)
-    country_id            = Column(Integer, ForeignKey("countries.id"), nullable=False)
-    year                  = Column(Integer, nullable=False)
-    urban_population_pct  = Column(Float)   # % гарадскога насельніцтва
-    gdp_per_capita        = Column(Float)   # USD
-    population_total      = Column(Float)
-    source                = Column(String(50), default="OWID")
-
-    country = relationship("Country", back_populates="urbanization")
-"""
-
-
+    city = relationship("City", back_populates="stats")
