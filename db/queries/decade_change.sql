@@ -1,37 +1,40 @@
---For each country, the decade-over-decade change in CO₂/capita (1990s→2000s→2010s)
-select
+-- For each country, the decade-over-decade change in CO₂/capita (1990's-2000's-2010's)
+SELECT
 	r.country,
 	r.year,
-   	to_char(round(r.co2_per_capita::numeric, 2), 'FM999990.00') as co2_per_capita,
-   	to_char(round(r.prev_co2_per_capita::numeric, 2), 'FM999990.00') as prev_co2_per_capita,
-   	to_char(round(r.reduction::numeric, 2), 'FM999990.00') as reduction
-from
-(
-	SELECT
-		c.name AS country,
-		c.iso_code,
-	   	e.co2_per_capita,
-	   	e.year,
-	   	LAG(e.co2_per_capita, 10) OVER (
-	  		PARTITION BY c.name
-	  		ORDER BY e.year
-		) as prev_co2_per_capita,
-		100 - e.co2_per_capita * 100 / LAG(e.co2_per_capita, 10) OVER (PARTITION BY c.name ORDER BY e.year) as reduction
-	FROM
-		emissions e 
-	JOIN 
-		countries c ON c.id = e.country_id
-	where 
-		c.iso_code in (
-				'AUT', 'BEL', 'BGR', 'HRV', 'CYP', 'CZE', 'DNK', 'EST', 'FIN', 
-				'FRA', 'DEU', 'GRC', 'HUN', 'IRL', 'ITA', 'LVA', 'LTU', 'LUX', 
-				'MLT', 'NLD', 'POL', 'PRT', 'ROU', 'SVK', 'SVN', 'ESP', 'SWE', 
+	ROUND(r.co2_per_capita::NUMERIC, 2) AS co2_per_capita,
+	ROUND(r.prev_co2_per_capita::NUMERIC, 2) AS prev_co2_per_capita,
+	ROUND(r.reduction::NUMERIC, 2) AS reduction
+FROM
+	(
+		SELECT
+			c.name AS country,
+			c.iso_code,
+			e.co2_per_capita,
+			e.year,
+			LAG(e.co2_per_capita, 10) OVER (
+				PARTITION BY c.name
+				ORDER BY e.year
+			) AS prev_co2_per_capita,
+			100 - e.co2_per_capita * 100 / LAG(e.co2_per_capita, 10) OVER (
+				PARTITION BY c.name
+				ORDER BY e.year
+			) AS reduction
+		FROM
+			emissions e
+		JOIN
+			countries c ON c.id = e.country_id
+		WHERE
+			c.iso_code IN (
+				'AUT', 'BEL', 'BGR', 'HRV', 'CYP', 'CZE', 'DNK', 'EST', 'FIN',
+				'FRA', 'DEU', 'GRC', 'HUN', 'IRL', 'ITA', 'LVA', 'LTU', 'LUX',
+				'MLT', 'NLD', 'POL', 'PRT', 'ROU', 'SVK', 'SVN', 'ESP', 'SWE',
 				'BLR', 'GEO', 'GBR', 'CHE', 'NOR', 'ALB', 'UKR')
-		and
-		e."year" > 1989
-) r
-where
-	r.year in (2000, 2010, 2020)
-order by
+			AND
+			e."year" > 1989
+	) r
+WHERE
+	r.year IN (2000, 2010, 2020)
+ORDER BY
 	r.country,
 	r.year;
