@@ -10,12 +10,13 @@ class Country(Base):
     """
     __tablename__ = "countries"
 
-    id         = Column(Integer, primary_key=True)
-    name       = Column(String(100), nullable=False)
-    iso_code   = Column(String(3), unique=True, nullable=False)  # e.g. "POL", "DEU"
-    continent  = Column(String(50))
-    region     = Column(String(100))   # "Western Europe", "Eastern Europe" etc.
-    income_group = Column(String(50))  # World Bank: "High income", "Upper middle" etc.
+    id           = Column(Integer, primary_key=True)
+    name         = Column(String(100), nullable=False)
+    iso_code     = Column(String(3), unique=True, nullable=False)  # e.g. "POL", "DEU"
+    continent    = Column(String(50))
+    region       = Column(String(100))  # World Bank broad region, e.g. "Europe & Central Asia"
+    subregion    = Column(String(50))   # UN M49 sub-region, e.g. "Northern Europe" (Europe-scoped)
+    income_group = Column(String(50))   # World Bank: "High income", "Upper middle income", ...
 
     emissions    = relationship("Emission", back_populates="country")
     urbanization = relationship("Urbanization", back_populates="country")

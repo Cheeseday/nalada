@@ -5,6 +5,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import logging
 import time
 from etl.owid_loader import run as run_owid
+from etl.country_enrichment import run as run_enrichment
 from etl.worldbank_loader import run as run_worldbank
 from etl.eurostat_loader import run as run_eurostat
 
@@ -17,9 +18,10 @@ def run_pipeline():
     start = time.time()
     
     steps = [
-        ("OWID CO2 data",    run_owid),
-        ("World Bank data",  run_worldbank),
-        ("Eurostat cities",  run_eurostat),
+        ("OWID CO2 data",        run_owid),
+        ("Country enrichment",   run_enrichment),
+        ("World Bank data",      run_worldbank),
+        ("Eurostat cities",      run_eurostat),
     ]
 
     for step_name, step_fn in steps:
