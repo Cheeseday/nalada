@@ -88,6 +88,21 @@ def get_grid_cleanliness() -> pd.DataFrame:
     return _run("grid_cleanliness")
 
 
+def get_city_cars_snapshot(snap_year: int = 2018) -> pd.DataFrame:
+    """Per-city cars/1000 + population + decoupling verdict (best-coverage year)."""
+    return _run("city_cars_snapshot", snap_year=snap_year)
+
+
+def get_city_cars_by_country(snap_year: int = 2018) -> pd.DataFrame:
+    """Median cars/1000 per European country, tagged with decoupling verdict."""
+    return _run("city_cars_by_country", snap_year=snap_year)
+
+
+def get_tpi_leaderboard(base_year: int = 2000) -> pd.DataFrame:
+    """TPI leaderboard (NB08), ranked by final score. base_year 2000 = headline, 1990 = contrast."""
+    return _run("tpi_scores", base_year=base_year)
+
+
 if __name__ == "__main__":
     # Smoke test: run every query, report row/col counts, catch per-query errors.
     logging.basicConfig(level=logging.INFO)
@@ -105,6 +120,10 @@ if __name__ == "__main__":
         ("decoupling_index (1990)",   lambda: get_decoupling_index(1990)),
         ("subregion_rankings",        get_subregion_rankings),
         ("grid_cleanliness",          get_grid_cleanliness),
+        ("city_cars_by_country",      get_city_cars_by_country),
+        ("city_cars_snapshot",        get_city_cars_snapshot),
+        ("tpi_leaderboard (2000)",    lambda: get_tpi_leaderboard(2000)),
+        ("tpi_leaderboard (1990)",    lambda: get_tpi_leaderboard(1990)),
     ]
 
     failures = 0
