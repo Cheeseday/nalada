@@ -68,6 +68,11 @@ def get_fake_decoupler_board() -> pd.DataFrame:
     return _run("fake_decoupler_board")
 
 
+def get_decoupler_class() -> pd.DataFrame:
+    """Canonical genuine/fake/net_exporter verdicts per country (NB04)."""
+    return _run("decoupler_class")
+
+
 def get_consumption_gap() -> pd.DataFrame:
     """Gap between consumption and territorial CO₂/capita, ranked (honest vs flattering)."""
     return _run("gap_co2_per_capita")
@@ -115,6 +120,7 @@ if __name__ == "__main__":
         ("decade_change",             get_decade_change),
         ("emissions_peak",            get_emissions_peak),
         ("fake_decoupler_board",      get_fake_decoupler_board),
+        ("decoupler_class",           get_decoupler_class),
         ("consumption_gap",           get_consumption_gap),
         ("decoupling_index (2000)",   lambda: get_decoupling_index(2000)),
         ("decoupling_index (1990)",   lambda: get_decoupling_index(1990)),
