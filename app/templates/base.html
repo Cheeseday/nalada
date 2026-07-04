@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Nalada{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <!-- Plotly loaded once per page; chapter charts call Plotly.newPlot into their divs. -->
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="{{ url_for('main.index') }}">
+        Nalada<span class="brand-dot">.</span>
+      </a>
+      <nav class="site-nav" aria-label="Chapters">
+        {% for ch in chapters %}
+        <a class="nav-link{% if request.view_args and request.view_args.get('slug') == ch.slug %} is-active{% endif %}"
+           href="{{ url_for('main.chapter', slug=ch.slug) }}">
+          <span class="nav-num">{{ '%02d' % ch.num }}</span>
+          <span class="nav-title">{{ ch.title }}</span>
+        </a>
+        {% endfor %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <p class="footer-sources">
+        Sources: <strong>Our World in Data</strong> (CO₂ &amp; consumption),
+        <strong>World Bank</strong> (urbanization &amp; income),
+        <strong>Eurostat</strong> (city statistics).
+      </p>
+      <p class="muted">A portfolio project on growth, cities &amp; carbon.</p>
+    </div>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

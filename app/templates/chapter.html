@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Nalada. {{ chapter.title }}{% endblock %}
+
+{% block content %}
+<section class="chapter-header">
+  <div class="wrap">
+    <span class="scope-badge" title="Scope: {{ chapter.scope_label }}">
+      {{ chapter.scope }} {{ chapter.scope_label }}
+    </span>
+    <p class="eyebrow">Chapter {{ '%02d' % chapter.num }}</p>
+    <h1>{{ chapter.title }}</h1>
+    <p class="hero-lead">{{ chapter.tagline }}</p>
+  </div>
+</section>
+
+<section class="wrap chapter-body">
+  {% if chapter_intro %}<p class="chapter-intro">{{ chapter_intro }}</p>{% endif %}
+  {% set ns = namespace(section=None) %}
+  {% for block in charts %}
+    {% if block.section and block.section != ns.section %}
+      {% set ns.section = block.section %}
+      <h2 class="section-label">{{ block.section }}</h2>
+      {% if section_intros and section_intros.get(block.section) %}
+        <p class="section-intro">{{ section_intros[block.section] }}</p>
+      {% endif %}
+    {% endif %}
+  <figure class="chart-block">
+    <div class="chart-head">
+      <span class="scope-badge">{{ block.scope }}</span>
+      <h3>{{ block.title }}</h3>
+    </div>
+    <div class="chart js-plot" data-plot="fig-{{ block.id }}"></div>
+    <script type="application/json" id="fig-{{ block.id }}">{{ block.fig_json | safe }}</script>
+    <figcaption class="chart-takeaway">{{ block.takeaway }}</figcaption>
+  </figure>
+  {% endfor %}
+  {% if chapter_outro %}<p class="chapter-outro">{{ chapter_outro }}</p>{% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}

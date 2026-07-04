@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Nalada - growth, cities &amp; carbon{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">A data story in four chapters</p>
+    <h1 class="hero-title">
+      Does economic growth <em>have</em> to mean more&nbsp;CO₂?
+    </h1>
+    <p class="hero-lead">
+      Some countries grew their economies while cutting emissions. But is Europe's
+      “green growth” real - or are the emissions simply exported to somewhere the
+      accounting can't see?
+    </p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="{{ url_for('main.chapter', slug='decoupling') }}">
+        Start with the twist -
+      </a>
+      <a class="btn btn-ghost" href="#chapters">See all four chapters</a>
+    </div>
+  </div>
+</section>
+
+<section class="twist">
+  <div class="wrap">
+    <div class="twist-card">
+      <h2>The thread that connects everything</h2>
+      <p>
+        <strong>Territorial</strong> emissions - what a country burns inside its
+        borders - tell a flattering story. <strong>Consumption</strong> emissions -
+        what its people actually consume, wherever it was made - tell an honest one.
+        The gap between the two indicators is where borrowed green credentials hide.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="chapters" class="chapters">
+  <div class="wrap">
+    <h2 class="section-title">The four chapters</h2>
+    <div class="card-grid">
+      {% for ch in chapters %}
+      <a class="chapter-card" href="{{ url_for('main.chapter', slug=ch.slug) }}">
+        <div class="card-top">
+          <span class="chapter-num">{{ '%02d' % ch.num }}</span>
+          <span class="scope-badge" title="Scope: {{ ch.scope_label }}">
+            {{ ch.scope }} {{ ch.scope_label }}
+          </span>
+        </div>
+        <h3 class="card-title">{{ ch.title }}</h3>
+        <p class="card-tagline">{{ ch.tagline }}</p>
+        <span class="card-link">Read chapter -></span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Nalada. {{ chapter.title }}{% endblock %}
+
+{% block content %}
+<section class="chapter-header">
+  <div class="wrap">
+    <span class="scope-badge" title="Scope: {{ chapter.scope_label }}">
+      {{ chapter.scope }} {{ chapter.scope_label }}
+    </span>
+    <p class="eyebrow">Chapter {{ '%02d' % chapter.num }}</p>
+    <h1>{{ chapter.title }}</h1>
+    <p class="hero-lead">{{ chapter.tagline }}</p>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="placeholder">
+    <span class="placeholder-icon">📊</span>
+    <p>This chapter's charts are coming in a later build phase.</p>
+    <a class="btn btn-ghost" href="{{ url_for('main.index') }}">- Back to the overview</a>
+  </div>
+</section>
+{% endblock %}
