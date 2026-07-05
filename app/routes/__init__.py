@@ -70,9 +70,19 @@ _SEC_FLAT = "The flattering lens - territorial emissions"
 _SEC_HONEST = "The honest test - consumption & trade"
 VERDICT = "The verdict"
 
+# Chapter 1 narrative scaffolding
+_SEC_ACCUSED = "The accusation - cities look guilty"
+_SEC_DRIVER = "The real driver - wealth, not density"
+_SEC_TWIST = "The twist - denser cities, cleaner air"
+
 # Connective tissue: a chapter intro that plants the doubt, a blurb under each section that
 # marks the turn, and an outro that hands off to Chapter 4. Keyed by chapter slug.
 _CHAPTER_INTRO = {
+    "context": (
+        "Cities are where most of humanity now lives, and where climate policy is usually said to "
+        "be won or lost. So before judging any country's transition, this chapter asks a blunt "
+        "question: is urban living itself the problem? The data says no - and points at what is."
+    ),
     "decoupling": (
         "On paper, Europe has already won the hardest argument in climate policy: 27 of 34 "
         "countries cut their CO₂ while their economies kept growing. This chapter takes that "
@@ -81,6 +91,20 @@ _CHAPTER_INTRO = {
     ),
 }
 _SECTION_INTRO = {
+    "context": {
+        _SEC_ACCUSED: (
+            "Across the world's countries, urbanisation and CO₂ really do climb together. That "
+            "correlation is the reason cities get blamed in the first place."
+        ),
+        _SEC_DRIVER: (
+            "But split the same countries by income and the link falls apart: density predicts "
+            "almost nothing about emissions, while wealth predicts almost everything."
+        ),
+        _SEC_TWIST: (
+            "And where dense cities were supposed to choke on their own air, Europe shows the "
+            "opposite - the more urban the country, the cleaner its air."
+        ),
+    },
     "decoupling": {
         _SEC_FLAT: (
             "Every figure here counts only the CO₂ emitted inside a country's own borders - "
@@ -169,26 +193,48 @@ def _decoupling_blocks():
 
 
 def _context_blocks():
-    """Chapter 1. The world context"""
+    """Chapter 1 - the red herring: cities look guilty, but wealth (not density) drives emissions."""
     ds, ch = data_service, charts
     GL = "🌍 Global"
+    ACCUSED, DRIVER, TWIST = _SEC_ACCUSED, _SEC_DRIVER, _SEC_TWIST
     return [
         _chart_block(
-            "urban-by-income", 
-            "Urbanization and CO₂ rise together across the world's countries. Case closed?", 
+            "urban-by-income",
+            "Urbanization and CO₂ rise together across the world's countries. Case closed?",
             GL,
-            "Let's take a first look: the biggest territorial CO₂/capita cuts of the "
-            "last decade.",
-            ch.build_urban_by_income(ds.get_co2_urban_by_income()), 
-            # section=FLAT
+            "Richer countries are both more urban and higher-emitting - the two climb together up "
+            "the income ladder. That shared rise is the whole basis for blaming cities.",
+            ch.build_urban_by_income(ds.get_co2_urban_by_income()),
+            section=ACCUSED,
         ),
         _chart_block(
-            "density-vs-emissions", 
-            "Do dense countries pollute more?", 
+            "density-vs-emissions",
+            "Do dense countries pollute more?",
             GL,
-            "Density doesn't help to predict the emissions level. But wealth does.",
-            ch.build_density_vs_emissions(ds.get_density_vs_co2()), 
-            # section=FLAT
+            "Density doesn't predict emissions - dense and sparse countries emit across the same "
+            "range. What separates them is their colour: income.",
+            ch.build_density_vs_emissions(ds.get_density_vs_co2()),
+            section=DRIVER,
+        ),
+        _chart_block(
+            "gdp-vs-co2",
+            "Does wealth predict emissions?",
+            GL,
+            "GDP per capita is the single strongest predictor of CO₂ (r ≈ 0.75) - far stronger than "
+            "density or urbanisation. This is the real driver the earlier charts kept pointing at.",
+            ch.build_gdp_vs_co2(ds.get_gdp_vs_co2()),
+            section=DRIVER,
+        ),
+        _chart_block(
+            "urban-vs-pm25",
+            "Do cities choke on their own air?",
+            GL,
+            "Worldwide the link is weak and noisy - some dense, poorer countries have the dirtiest "
+            "air of all. But zoom into Europe's peer group (highlighted) and it flips clean: the "
+            "more urban the country, the lower its PM2.5. Clean air is about what you burn, not "
+            "how densely you live.",
+            ch.build_urban_vs_air_pollution(ds.get_urban_vs_air_pollution()),
+            section=TWIST,
         ),
     ]
 

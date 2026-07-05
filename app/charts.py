@@ -1,3 +1,4 @@
+import numpy as np
 """
 Figure builders for the dashboard - one builder per data_service getter.
 
@@ -310,36 +311,40 @@ def build_top_reducers(df) -> go.Figure:
 def build_urban_by_income(df) -> go.Figure:
     """Changes in urbanization percentage and average CO₂ emissions by income group"""
     order = ["Low income", "Lower middle income", "Upper middle income", "High income"]
-    fig = go.Figure()
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace(go.Bar(
-                    x=df["income_group"], 
-                    y=df["avg_co2_per_capita"], 
-                    marker_color=ACCENT, 
+                    x=df["income_group"],
+                    y=df["avg_co2_per_capita"],
+                    marker_color=ACCENT,
                     customdata=df[["countries"]],
-                    hovertemplate=("<b>%{x}</b><br>Countries: %{customdata[0]}<br>Average CO₂/capita: %{y:.1f} t/cap"
+                    hovertemplate=("<b>%{x}</b><br>Countries: %{customdata[0]}<br>Average CO₂: %{y:.1f}t/cap"
                     "<extra></extra>"),
                     showlegend=False,
-                ), secondary_y=False),
+                ), secondary_y=False)
     fig.add_trace(go.Scatter(
-                    x=df["income_group"], 
-                    y=df["avg_urban_pct"], 
+                    x=df["income_group"],
+                    y=df["avg_urban_pct"],
                     mode="lines+markers",
                     line=dict(color=WARM),
                     marker=dict(size=16),
                     customdata=df[["countries"]],
-                    hovertemplate=("<b>%{x}</b><br>Countries: %{customdata[0]}<br>Average urbanization: %{y:.0f} %"
-                    "<extra></extra>"),
+                    hovertemplate=( "<b>%{x}</b><br>Countries: %{customdata[0]}<br>"
+                                    "Average urbanization: %{y:.0f}%"
+                                    "<extra></extra>"
+                    ),
                     showlegend=False,
-                ),secondary_y=True)
+                ), secondary_y=True)
     fig.update_xaxes(categoryorder="array", categoryarray=order)
-    return _apply_theme(
+    fig = _apply_theme(
         fig,
         height=560,
         bargap=0.38,
         xaxis_title=None,
         yaxis_title="Average CO₂/capita (tonnes)",
     )
+    fig.update_yaxes(rangemode="tozero", secondary_y=False)
+    fig.update_yaxes(title_text="Average urban population (%)", rangemode="tozero", secondary_y=True)
+    return fig
 
 
 _INCOME_COLORS = {
@@ -348,7 +353,6 @@ _INCOME_COLORS = {
     "Lower middle income":  "#F1B72F",
     "Low income":           "#DF2E25",
 }
-
 def build_density_vs_emissions(df) -> go.Figure:
     """Population density and territorial CO₂ per capita"""
     df["color"] = df["income_group"].map(_INCOME_COLORS)
@@ -356,22 +360,92 @@ def build_density_vs_emissions(df) -> go.Figure:
         go.Scatter(
             x=df["population_density"],
             y=df["co2_per_capita"],
-            mode="markers",
-            marker_color=df["color"],
-            marker=dict(size=16),
+            mode="markers+text",
+            showlegend=False,
+            marker=dict(color=df["color"], size=15, line=dict(width=1, color="#ffffff")),
             customdata=df[["country"]],
             hovertemplate=(
                 "<b> %{customdata[0]}</b><br>"
-                " CO₂ / capita: %{y:.2f} t<br>"
-                " Population density: %{x:.2f}<extra></extra>"
+                " CO₂: %{y:.2f}t/cap<br>"
+                " Population density: %{x:.2f} people/km²<extra></extra>"
             ),
         )
     )
     fig = _apply_theme(
         fig,
-        height=630,
+        height=620,
         xaxis_title="Population density (people/km², log scale)",
         yaxis_title="CO₂ per capita (tonnes)",
     )
     fig.update_xaxes(type="log")
     return fig
+
+
+def build_urban_vs_air_pollution(df) -> go.Figure:
+    """Urban % vs PM2.5: noisy worldwide, but clearly negative within Europe (highlighted, r ≈ -0.51)."""
+    HOVER = ("<b>%{customdata[0]}</b><br> Urban population: %{x:.0f}%<br>"
+             " PM2.5 exposure: %{y:.1f}µg/m³<extra></extra>")
+    eu = df[df["is_europe"]].dropna(subset=["urban_population_pct", "pm25_exposure"])
+    row = df[~df["is_europe"]]
+
+    slope, intercept = np.polyfit(eu["urban_population_pct"], eu["pm25_exposure"], 1)
+    xs = np.array([eu["urban_population_pct"].min(), eu["urban_population_pct"].max()])
+    r = eu["urban_population_pct"].corr(eu["pm25_exposure"])
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(          # rest of the world
+        x=row["urban_population_pct"], y=row["pm25_exposure"], mode="markers", name="Rest of world",
+        marker=dict(size=9, color=MUTED, opacity=0.35),
+        customdata=row[["country"]], hovertemplate=HOVER,
+    ))
+    fig.add_trace(go.Scatter(          # Europe
+        x=eu["urban_population_pct"], y=eu["pm25_exposure"], mode="markers", name="Europe",
+        marker=dict(size=15, color=ACCENT, line=dict(width=1, color="#ffffff")),
+        customdata=eu[["country"]], hovertemplate=HOVER,
+    ))
+    fig.add_trace(go.Scatter(
+        x=xs, y=slope * xs + intercept, mode="lines",
+        line=dict(color=ACCENT, width=2, dash="dash"), hoverinfo="skip", showlegend=False,
+    ))
+    fig.add_annotation(x=0.98, y=0.95, xref="paper", yref="paper", xanchor="right",
+                       text=f"Europe: r = {r:.2f}", showarrow=False, font=dict(color=ACCENT, size=14))
+    fig = _apply_theme(
+        fig,
+        height=620,
+        margin=dict(l=8, r=28, t=40, b=8),
+        legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="left", x=0),
+        xaxis_title="Urban population (%)",
+        yaxis_title="PM2.5 exposure (µg/m³)",
+    )
+    return fig
+
+
+def build_gdp_vs_co2(df) -> go.Figure:
+    """GDP per capita vs territorial CO₂ per capita, coloured by income group (wealth drives emissions)."""
+    df["color"] = df["income_group"].map(_INCOME_COLORS)
+    r = df["gdp_per_capita"].corr(df["co2_per_capita"])   # Pearson: strength of the wealth->CO₂ link
+    fig = go.Figure(
+        go.Scatter(
+            x=df["gdp_per_capita"],
+            y=df["co2_per_capita"],
+            mode="markers+text",
+            marker=dict(color=df["color"], size=15, line=dict(width=1, color="#ffffff")),
+            customdata=df[["country"]],
+            hovertemplate=(
+                "<b> %{customdata[0]}</b><br>"
+                " GDP: %{x:.0f}$/cap<br>"
+                " CO₂: %{y:.1f}t/cap<extra></extra>"
+            ),
+        )
+    )
+    fig = _apply_theme(
+        fig,
+        height=620,
+        xaxis_title="GDP per capita (international $, log scale)",
+        yaxis_title="CO₂ per capita (tonnes)",
+    )
+    fig.update_xaxes(type="log")
+    fig.add_annotation(x=0.03, y=0.96, xref="paper", yref="paper", xanchor="left",
+                       text=f"r = {r:.2f}", showarrow=False, font=dict(color=ACCENT, size=16))
+    return fig
+
