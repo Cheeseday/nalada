@@ -34,6 +34,10 @@ INCOME_LABELS = {
     'INX': 'Not classified',
 }
 
+INCOME_OVERRIDES = {
+    'TWN': 'High income',   # Taiwan: unclassified by WB, unambiguously high-income by GDP/capita
+}
+
 # UN M49 European sub-regions. World Bank lumps all of Europe into one region
 # ("Europe & Central Asia"), so this hardcoded map gives the balanced
 # Northern/Western/Eastern/Southern split for within-Europe peer grouping.
@@ -121,6 +125,12 @@ def update_countries(class_df: pd.DataFrame, session: Session) -> None:
         if subregion is not None:
             country.subregion = subregion
             sub_updated += 1
+
+    # Apply manual income-group overrides for economies the World Bank doesn't classify.
+    for iso_code, group in INCOME_OVERRIDES.items():
+        country = countries.get(iso_code)
+        if country is not None and country.income_group in (None, 'NaN', 'NA'):
+            country.income_group = group
 
     logger.info(f"World Bank region/income set: {wb_updated}")
     logger.info(f"UN M49 subregion set: {sub_updated}")
