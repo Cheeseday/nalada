@@ -168,10 +168,38 @@ def _decoupling_blocks():
     ]
 
 
+def _context_blocks():
+    """Chapter 1. The world context"""
+    ds, ch = data_service, charts
+    GL = "🌍 Global"
+    return [
+        _chart_block(
+            "urban-by-income", 
+            "Urbanization and CO₂ rise together across the world's countries. Case closed?", 
+            GL,
+            "Let's take a first look: the biggest territorial CO₂/capita cuts of the "
+            "last decade.",
+            ch.build_urban_by_income(ds.get_co2_urban_by_income()), 
+            # section=FLAT
+        ),
+        _chart_block(
+            "density-vs-emissions", 
+            "Do dense countries pollute more?", 
+            GL,
+            "Density doesn't help to predict the emissions level. But wealth does.",
+            ch.build_density_vs_emissions(ds.get_density_vs_co2()), 
+            # section=FLAT
+        ),
+    ]
+
+
+
 def _charts_for(slug):
     """Ordered chart blocks for a chapter, or [] if it isn't built yet (falls back to the stub)."""
     if slug == "decoupling":
         return _decoupling_blocks()
+    if slug == "context":
+        return _context_blocks()
     return []
 
 

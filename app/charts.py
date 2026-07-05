@@ -6,6 +6,7 @@ Each builder takes a DataFrame and returns a Plotly go.Figure; the route seriali
 it with fig.to_json() and the browser renders it via Plotly.newPlot (see static/js/charts.js).
 """
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 # Palette shared with app/static/css/style.css so the figures and the page read as one piece.
 INK = "#16202a"
@@ -35,6 +36,9 @@ def _apply_theme(fig: go.Figure, **layout) -> go.Figure:
     fig.update_yaxes(gridcolor=GRID, zerolinecolor=GRID, linecolor=GRID)
     return fig
 
+
+
+#Decoupling part
 
 # Tapio decoupling categories (shared vocabulary with NB09)
 _TAPIO_COLORS = {
@@ -194,8 +198,8 @@ def build_consumption_gap(df):
                 text=d["gap_per_capita"].map(lambda v: f"{v:.1f}"),
                 textposition="outside",
                 customdata=d[["co2_per_capita", "consumption_co2_per_capita"]],
-                hovertemplate=("<b>%{y}</b><br>territorial CO₂: %{customdata[0]} t/cap <br>consumption CO₂: %{customdata[1]} t/cap"
-                                "<br>gap: %{x:+.1f} t/cap<extra></extra>"),
+                hovertemplate=("<b>%{y}</b><br>territorial CO₂: %{customdata[0]:.1f} t/cap <br>consumption CO₂: %{customdata[1]:.1f} t/cap"
+                                "<br>gap: %{x:.1f} t/cap<extra></extra>"),
     ))
     fig.add_vline(x=0, line=dict(color=INK, width=1))
     return _apply_theme(fig, 
@@ -300,3 +304,74 @@ def build_top_reducers(df) -> go.Figure:
         xaxis_title="CO₂ per capita reduction over 10 years (%)",
         yaxis_title=None,
     )
+
+
+# Context - Chapter 1
+def build_urban_by_income(df) -> go.Figure:
+    """Changes in urbanization percentage and average CO₂ emissions by income group"""
+    order = ["Low income", "Lower middle income", "Upper middle income", "High income"]
+    fig = go.Figure()
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig.add_trace(go.Bar(
+                    x=df["income_group"], 
+                    y=df["avg_co2_per_capita"], 
+                    marker_color=ACCENT, 
+                    customdata=df[["countries"]],
+                    hovertemplate=("<b>%{x}</b><br>Countries: %{customdata[0]}<br>Average CO₂/capita: %{y:.1f} t/cap"
+                    "<extra></extra>"),
+                    showlegend=False,
+                ), secondary_y=False),
+    fig.add_trace(go.Scatter(
+                    x=df["income_group"], 
+                    y=df["avg_urban_pct"], 
+                    mode="lines+markers",
+                    line=dict(color=WARM),
+                    marker=dict(size=16),
+                    customdata=df[["countries"]],
+                    hovertemplate=("<b>%{x}</b><br>Countries: %{customdata[0]}<br>Average urbanization: %{y:.0f} %"
+                    "<extra></extra>"),
+                    showlegend=False,
+                ),secondary_y=True)
+    fig.update_xaxes(categoryorder="array", categoryarray=order)
+    return _apply_theme(
+        fig,
+        height=560,
+        bargap=0.38,
+        xaxis_title=None,
+        yaxis_title="Average CO₂/capita (tonnes)",
+    )
+
+
+_INCOME_COLORS = {
+    "High income":          "#01853A",
+    "Upper middle income":  "#BDD96A",
+    "Lower middle income":  "#F1B72F",
+    "Low income":           "#DF2E25",
+}
+
+def build_density_vs_emissions(df) -> go.Figure:
+    """Population density and territorial CO₂ per capita"""
+    df["color"] = df["income_group"].map(_INCOME_COLORS)
+    fig = go.Figure(
+        go.Scatter(
+            x=df["population_density"],
+            y=df["co2_per_capita"],
+            mode="markers",
+            marker_color=df["color"],
+            marker=dict(size=16),
+            customdata=df[["country"]],
+            hovertemplate=(
+                "<b> %{customdata[0]}</b><br>"
+                " CO₂ / capita: %{y:.2f} t<br>"
+                " Population density: %{x:.2f}<extra></extra>"
+            ),
+        )
+    )
+    fig = _apply_theme(
+        fig,
+        height=630,
+        xaxis_title="Population density (people/km², log scale)",
+        yaxis_title="CO₂ per capita (tonnes)",
+    )
+    fig.update_xaxes(type="log")
+    return fig
