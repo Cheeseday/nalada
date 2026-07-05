@@ -48,6 +48,11 @@ def get_urban_vs_air_pollution() -> pd.DataFrame:
     return _run("urban_vs_air_pollution")
 
 
+def get_gdp_vs_co2() -> pd.DataFrame:
+    """Per-country GDP/capita vs territorial CO₂/capita, latest shared year, by income group (global; NB05 r≈0.74)."""
+    return _run("gdp_vs_co2")
+
+
 def get_top_reducers() -> pd.DataFrame:
     """Top 10 European countries by % CO₂/capita reduction over the last 10 years."""
     return _run("top_reducers")
@@ -116,6 +121,7 @@ if __name__ == "__main__":
         ("co2_urban_by_income",       get_co2_urban_by_income),
         ("density_vs_co2",            get_density_vs_co2),
         ("urban_vs_air_pollution",    get_urban_vs_air_pollution),
+        ("gdp_vs_co2",                get_gdp_vs_co2),
         ("top_reducers",              get_top_reducers),
         ("decade_change",             get_decade_change),
         ("emissions_peak",            get_emissions_peak),

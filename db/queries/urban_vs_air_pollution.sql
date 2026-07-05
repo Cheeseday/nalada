@@ -20,7 +20,12 @@ SELECT
 	c.name AS country,
 	u.year,
 	u.urban_population_pct,
-	u.pm25_exposure
+	u.pm25_exposure,
+	c.iso_code IN (
+		'AUT', 'BEL', 'BGR', 'HRV', 'CYP', 'CZE', 'DNK', 'EST', 'FIN',
+		'FRA', 'DEU', 'GRC', 'HUN', 'IRL', 'ITA', 'LVA', 'LTU', 'LUX',
+		'MLT', 'NLD', 'POL', 'PRT', 'ROU', 'SVK', 'SVN', 'ESP', 'SWE',
+		'BLR', 'GEO', 'GBR', 'CHE', 'NOR', 'ALB', 'UKR') AS is_europe
 FROM
 	latest_urb u
 JOIN
