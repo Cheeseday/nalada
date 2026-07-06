@@ -32,7 +32,7 @@ CHAPTERS = [
         "title": "Structure",
         "scope": "🇪🇺", 
         "scope_label": "Europe",
-        "tagline": "Do genuine decouplers build cities differently? We tested it "
+        "tagline": "Do genuine decouplers build cities differently? I tested it "
                    "rigorously - and the real driver is city size, not honesty.",
     },
     {
@@ -75,6 +75,11 @@ _SEC_ACCUSED = "The accusation - cities look guilty"
 _SEC_DRIVER = "The real driver - wealth, not density"
 _SEC_TWIST = "The twist - denser cities, cleaner air"
 
+# Chapter 3 narrative scaffolding
+_SEC_HYPOTHESIS = "The tempting hypothesis - do honest countries build greener cities?"
+_SEC_TEST = "The rigorous test - and it fails"
+_SEC_SIZE = "The real driver - city size"
+
 # Connective tissue: a chapter intro that plants the doubt, a blurb under each section that
 # marks the turn, and an outro that hands off to Chapter 4. Keyed by chapter slug.
 _CHAPTER_INTRO = {
@@ -88,6 +93,11 @@ _CHAPTER_INTRO = {
         "countries cut their CO₂ while their economies kept growing. This chapter takes that "
         "claim apart - first admiring it, then testing whether it survives an honest look at "
         "what these countries actually consume."
+    ),
+    "structure": (
+        "Chapter 2 sorted Europe into genuine cutters and address-changers. The tempting next step "
+        "is to check whether that honesty shows up in how their cities are built - fewer cars, less "
+        "sprawl. This chapter runs that test, and reports what it found even though the answer is no."
     ),
 }
 _SECTION_INTRO = {
@@ -114,6 +124,19 @@ _SECTION_INTRO = {
             "Territorial numbers can't see emissions embodied in imports - so a country can look "
             "quite clean by buying its goods from someone else."
             "Let's take a look at what the combination of consumption and territorial CO₂ gives us."
+        ),
+    },
+    "structure": {
+        _SEC_HYPOTHESIS: (
+            "If genuinely decoupling countries build differently, their cities should lean less on "
+            "cars. Here is the median for each country, colored according to the decoupling verdict."
+        ),
+        _SEC_TEST: (
+            "As a verdict, compare every city's car dependency side by side. If the hypothesis were correct - "
+            "the genuine block would be located clearly below all the others, without overlapping them."
+        ),
+        _SEC_SIZE: (
+            "Car dependency is tracked by size, not by decoupling level. The bigger the city, the fewer cars per person."
         ),
     },
 }
@@ -239,6 +262,40 @@ def _context_blocks():
     ]
 
 
+def _structure_blocks():
+    """Chapter 3 - the null result: honesty doesn't shape cities; city size does."""
+    ds, ch = data_service, charts
+    EU = "🇪🇺 Europe"
+    HYPOTHESIS, TEST, SIZE = _SEC_HYPOTHESIS, _SEC_TEST, _SEC_SIZE
+    return [
+        _chart_block(
+            "median-city-cars-by-country",
+            "Do honest countries have less car-dependent cities?",
+            EU,
+            "Each bar is a country's median cars per 1000 people, coloured by its decoupling "
+            "verdict. As we can see, the specifics of the country affect much more than decoupling level.",
+            ch.build_city_cars_by_country(ds.get_city_cars_by_country()),
+            section=HYPOTHESIS,
+        ),
+        _chart_block(
+            "cars-distr-by-verdict",
+            "The rigorous test: cars by verdict",
+            EU,
+            "Divide each city by its country's verdict and the distributions overlap almost "
+            "entirely - genuine's median is even slightly higher, not lower than the fake one.",
+            ch.build_cars_dist_by_verdict(ds.get_city_cars_snapshot()),
+            section=TEST,
+        ),
+        _chart_block(
+            "cars-by-size-band",
+            "Does car dependency fall when city size is changing?",
+            EU,
+            "Bucketed by population, median number of cars per 1000 people falls monotonically as cities grow."
+            "Size, not honesty, is what actually predicts how car-dependent a European city is.",
+            ch.build_cars_by_size_band(ds.get_city_cars_snapshot()),
+            section=SIZE,
+        ),
+    ]
 
 def _charts_for(slug):
     """Ordered chart blocks for a chapter, or [] if it isn't built yet (falls back to the stub)."""
@@ -246,6 +303,8 @@ def _charts_for(slug):
         return _decoupling_blocks()
     if slug == "context":
         return _context_blocks()
+    if slug == "structure":
+        return _structure_blocks()
     return []
 
 
