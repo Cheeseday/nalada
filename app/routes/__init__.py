@@ -80,6 +80,11 @@ _SEC_HYPOTHESIS = "The tempting hypothesis - do honest countries build greener c
 _SEC_TEST = "The rigorous test - and it fails"
 _SEC_SIZE = "The real driver - city size"
 
+# Chapter 4 narrative scaffolding
+_SEC_RANK = "The ranking - who is transitioning honestly"
+_SEC_ANATOMY = "Anatomy of a score - what drives the rank"
+_SEC_CAVEATS = "Two honest caveats - clean now, and fast enough?"
+
 # Connective tissue: a chapter intro that plants the doubt, a blurb under each section that
 # marks the turn, and an outro that hands off to Chapter 4. Keyed by chapter slug.
 _CHAPTER_INTRO = {
@@ -98,6 +103,12 @@ _CHAPTER_INTRO = {
         "Chapter 2 sorted Europe into genuine cutters and address-changers. The tempting next step "
         "is to check whether that honesty shows up in how their cities are built - fewer cars, less "
         "sprawl. This chapter runs that test, and reports what it found even though the answer is no."
+    ),
+    "synthesis": (
+        "Everything so far converges here. The Transition Performance Index rolls decoupling honesty, "
+        "absolute footprint, grid cleanliness, prosperity and pace into a single criterion-referenced "
+        "score - weighted 40% on honesty, so that offshoring emissions can't buy a good grade. But an "
+        "index is only as trustworthy as its caveats, so the chapter ends by turning the ranking on itself."
     ),
 }
 _SECTION_INTRO = {
@@ -137,6 +148,23 @@ _SECTION_INTRO = {
         ),
         _SEC_SIZE: (
             "Car dependency is tracked by size, not by decoupling level. The bigger the city, the fewer cars per person."
+        ),
+    },
+    "synthesis": {
+        _SEC_RANK: (
+            "The headline ranking drops three countries whose numbers are distorted (Ireland's "
+            "profit-shifted GDP, Luxembourg's cross-border workforce, tiny Malta) and marks boundary "
+            "cases with an asterisk. Toggle the base year and watch how much of the post-Soviet lead "
+            "evaporates once the clock starts in 2000 instead of 1990."
+        ),
+        _SEC_ANATOMY: (
+            "No two leaders climb the same way. Each top-15 score is broken into the weighted points "
+            "every component contributes - honesty is the tall green base, the rest stacks on top."
+        ),
+        _SEC_CAVEATS: (
+            "A high rank means 'transitioning well relative to Europe', not 'done'. Two final checks "
+            "keep the index honest: where each country actually sits today, and whether even the "
+            "leaders are cutting fast enough to matter."
         ),
     },
 }
@@ -297,6 +325,66 @@ def _structure_blocks():
         ),
     ]
 
+
+def _synthesis_blocks():
+    """Chapter 4 - the capstone: the honest ranking, then two caveats that keep it humble."""
+    ds, ch = data_service, charts
+    EU = "🇪🇺 Europe"
+    RANK, ANATOMY, CAVEATS = _SEC_RANK, _SEC_ANATOMY, _SEC_CAVEATS
+    tpi_2000, tpi_1990 = ds.get_tpi_leaderboard(2000), ds.get_tpi_leaderboard(1990)
+    return [
+        _chart_block(
+            "tpi-leaderboard",
+            "The honest ranking: leaders by Transition Performance Index",
+            EU,
+            "Sweden and Finland (genuine) top the list; Portugal is the quiet surprise. The red bars "
+            "matter most - the UK, Denmark and France score well on grid, prosperity and pace, but are "
+            "flagged fake decouplers, so honesty pulls them down the board.",
+            ch.build_tpi_score(tpi_2000, tpi_1990),
+            section=RANK,
+        ),
+        _chart_block(
+            "rank-shift",
+            "How much of the lead is a post-Soviet windfall?",
+            EU,
+            "Lines sloping down to the right lost rank when the base year moves from 1990 to 2000 - "
+            "their advantage was built on the early-1990s industrial collapse, not recent policy. "
+            "Portugal climbs against the tide; several Eastern economies fall.",
+            ch.build_rank_shift(tpi_2000, tpi_1990),
+            section=RANK,
+        ),
+        _chart_block(
+            "tpi-weighted-contributions",
+            "What drives each score? Weighted contributions (2000 base, top 15)",
+            EU,
+            "Honesty - the 0.40-weighted green base - is what separates the leaders. Countries with "
+            "similar totals often get there through different mixes: a clean grid here, high prosperity "
+            "there, a strong recent trend somewhere else.",
+            ch.build_tpi_weighted_contribution(tpi_2000),
+            section=ANATOMY,
+        ),
+        _chart_block(
+            "tpi-journey",
+            "Journey vs destination: a good score is not a clean footprint",
+            EU,
+            "Every country still sits far from the 2 t/capita fair-share line (top). A high TPI marks "
+            "the countries transitioning best relative to Europe - the fastest movers, not the ones "
+            "that have already arrived.",
+            ch.build_tpi_journey(tpi_2000),
+            section=CAVEATS,
+        ),
+        _chart_block(
+            "tpi-sufficiency",
+            "Sufficiency: are even the leaders fast enough?",
+            EU,
+            "The punchline of the whole project. For the top-12, the pace actually achieved since 2010 "
+            "(slate) falls short of the pace required to reach 2 t/capita by 2050 (red) almost "
+            "everywhere. Relative virtue is not sufficiency.",
+            ch.build_tpi_sufficiency(ds.get_tpi_sufficiency()),
+            section=CAVEATS,
+        ),
+    ]
+
 def _charts_for(slug):
     """Ordered chart blocks for a chapter, or [] if it isn't built yet (falls back to the stub)."""
     if slug == "decoupling":
@@ -305,6 +393,8 @@ def _charts_for(slug):
         return _context_blocks()
     if slug == "structure":
         return _structure_blocks()
+    if slug == "synthesis":
+        return _synthesis_blocks()
     return []
 
 
