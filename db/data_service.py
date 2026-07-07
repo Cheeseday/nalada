@@ -113,6 +113,11 @@ def get_tpi_leaderboard(base_year: int = 2000) -> pd.DataFrame:
     return _run("tpi_scores", base_year=base_year)
 
 
+def get_tpi_sufficiency() -> pd.DataFrame:
+    """Actual vs required annual pace of consumption-CO₂/capita cuts for the TPI top-12 (2000 base)."""
+    return _run("tpi_sufficiency")
+
+
 if __name__ == "__main__":
     # Smoke test: run every query, report row/col counts, catch per-query errors.
     logging.basicConfig(level=logging.INFO)
@@ -136,6 +141,7 @@ if __name__ == "__main__":
         ("city_cars_snapshot",        get_city_cars_snapshot),
         ("tpi_leaderboard (2000)",    lambda: get_tpi_leaderboard(2000)),
         ("tpi_leaderboard (1990)",    lambda: get_tpi_leaderboard(1990)),
+        ("tpi_sufficiency",           get_tpi_sufficiency),
     ]
 
     failures = 0
