@@ -11,15 +11,21 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 # Palette shared with app/static/css/style.css so the figures and the page read as one piece.
-INK = "#16202a"
-MUTED = "#5c6b7a"
-ACCENT = "#0b7a43"       # deep decoupling green
-ACCENT_DARK = "#01853a"
-WARM = "#d1495b"
-GRID = "#e9ece7"
-GRID_A = "#c8ffa3"
-BLACK = "#121312"
+# Warm, calm three-colour system. INK / ACCENT / WARM / GRID mirror --ink / --accent / --clay / --border.
+INK = "#26231d"          # was #16202a
+MUTED = "#857c6c"        # was #5c6b7a  (charts.js lightens this on the dark panel)
+ACCENT = "#14532d"       # pine green   (was #0b7a43)
+ACCENT_DARK = "#1c6b3e"  # was #01853a
+WARM = "#c2603f"         # warm clay    (was #d1495b)
+GRID = "#e7e0d0"         # warm grid    (was #e9ece7)
+GRID_A = "#cfe8d6"       # was #c8ffa3
+BLACK = "#1c1a17"
 FONT = "system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+BORDER_RADIUS = "14px"
+
+# Light green for the Europe series on the dark finale panel — pine (#14532d) would
+# vanish against the #123a24 panel, so the always-dark PM2.5 chart uses this instead.
+EU_ON_DARK = "#7fbf8f"
 
 
 def _apply_theme(fig: go.Figure, **layout) -> go.Figure:
@@ -32,6 +38,7 @@ def _apply_theme(fig: go.Figure, **layout) -> go.Figure:
         margin=margin,
         colorway=[ACCENT, WARM, MUTED],
         hoverlabel=dict(font_family=FONT, bgcolor="rgba(255,255,255,0.75)", bordercolor=INK),
+        barcornerradius=5,
         **layout,
     )
     fig.update_xaxes(gridcolor=GRID, zerolinecolor=GRID, linecolor=GRID)
@@ -51,12 +58,12 @@ def _hex_to_rgba(hex_color: str, alpha: float) -> str:
 
 # Tapio decoupling categories (shared vocabulary with NB09)
 _TAPIO_COLORS = {
-    "Strong decoupling":     "#01853A",
-    "Weak decoupling":       "#A6D96A",
-    "Coupling":              "#F2C14E",
-    "Emissions outpace GDP": "#DF2E25",
-    "Emissions rose":        "#7F14A2",
-    "Recession":             "#878787",
+    "Strong decoupling":     "#14532d",  # pine
+    "Weak decoupling":       "#7fae5a",  # soft leaf
+    "Coupling":              "#d59a4a",  # amber
+    "Emissions outpace GDP": "#c2603f",  # clay
+    "Emissions rose":        "#8a6d9c",  # muted mauve
+    "Recession":             "#a89e8a",  # warm stone
 }
 
 
@@ -85,13 +92,42 @@ _VERDICT_LABEL = {
     "no_decoupling": "No decoupling", "fake": "Fake", "degrowth": "Degrowth",
 }
 _VERDICT_COLORS = {
-    "genuine": ACCENT, "net_exporter": "#e0a24a",
-    "no_decoupling": "#9aa7b1", "fake": WARM, "degrowth": "#7F14A2",
+    "genuine": ACCENT, "net_exporter": "#d59a4a",
+    "no_decoupling": "#a89e8a", "fake": WARM, "degrowth": "#8a6d9c",
 }
+
+def build_top_reducers(df) -> go.Figure:
+    """Horizontal bar: top-10 European countries by % CO₂/capita cut over the last decade."""
+    d = df.sort_values("reduction")
+    fig = go.Figure(
+        go.Bar(
+            x=d["reduction"],
+            y=d["country"],
+            orientation="h",
+            marker_color=ACCENT,
+            customdata=d[["prev_co2_per_capita", "co2_per_capita"]],
+            hovertemplate=(
+                "<b> %{y}</b><br>"
+                " CO₂/capita: %{customdata[0]:.1f} -> %{customdata[1]:.1f} t <br>"
+                " Reduction: %{x:.2f}%<extra></extra>"
+            ),
+            text=d["reduction"].map(lambda v: f" -{v:.0f}%"),
+            textfont=dict(size=15, color=ACCENT, weight=700),
+            textposition="outside",
+            cliponaxis=False,
+        )
+    )
+    return _apply_theme(
+        fig,
+        height=430,
+        bargap=0.36,
+        xaxis_title="CO₂ per capita reduction over 10 years (%)",
+        yaxis_title=None,
+    )
 
 
 def build_emissions_peak(df, top=15):
-    """Lollipop: how far below its all-time peak each country's total CO₂ now sits."""
+    """How much lower is the total CO₂ level in each country now than its historical maximum."""
     d = df.sort_values("abs_co2_drop", ascending=False).head(top).iloc[::-1]
     stem_x, stem_y = [], []
     for _, r in d.iterrows():
@@ -101,23 +137,29 @@ def build_emissions_peak(df, top=15):
     fig.add_trace(go.Scatter(x=stem_x, 
                              y=stem_y, 
                              mode="lines",
-                             line=dict(color=GRID, width=3), hoverinfo="skip", showlegend=False))
+                             line=dict(color=GRID, width=4), hoverinfo="skip", showlegend=False))
     fig.add_trace(go.Scatter(
         x=d["abs_co2_drop"], 
         y=d["country"], 
-        mode="markers",
-        marker=dict(color=ACCENT, size=11),
+        mode="markers+text",
+        marker=dict(color=ACCENT, size=13),
+        text=d["abs_co2_drop"].map(lambda v: f"  -{v:.0f}%"),
+        textposition='middle right',
+        textfont=dict(size=14, color=ACCENT, weight=700),
         customdata=d[["year_of_peak", "max_co2_total", "current_co2_total"]],
         hovertemplate=("<b>%{y}</b><br>%{x:.0f}% below peak<br>"
-                       "peak %{customdata[0]}: %{customdata[1]:.0f} Mt -> now: %{customdata[2]:.0f} Mt"
+                       "peak %{customdata[0]}: %{customdata[1]:.0f} Mt -> %{customdata[2]:.0f} Mt now"
                        "<extra></extra>"),
         showlegend=False,
     ))
-    return _apply_theme(fig, height=520, xaxis_title="Below peak emissions (%)", yaxis_title=None)
+    return _apply_theme(fig, 
+                        height=520, 
+                        xaxis_title="Below peak emissions (%)", 
+                        yaxis_title=None)
 
 
 def build_decade_change(df):
-    """Heatmap: each country's % CO2/capita change across the last three decades."""
+    """Heatmap: each country's % CO2 per capita change across the last three decades."""
     labels = {2000: "1990s", 2010: "2000s", 2020: "2010s"}
     d = df.copy()
     d["decade"] = d["year"].map(labels)
@@ -134,62 +176,38 @@ def build_decade_change(df):
                         xaxis_title=None, yaxis_title=None)
 
 
-def build_decoupling_index(df_2000, df_1990):
-    """Tapio scatter (GDP index vs CO₂ index) with a 1990/2000 base-year toggle."""
-    def prep(df):
-        d = df.copy()
-        d["category"] = [_tapio_category(g, c) for g, c in zip(d["gdp_index"], d["co2_index"])]
-        d["color"] = d["category"].map(_TAPIO_COLORS)
-        return d
+def build_decoupling_index(df) -> go.Figure:
+    """Tapio scatter (GDP index vs CO₂ index) for a single base year."""
+    d = df.copy()
+    d["category"] = [_tapio_category(g, c) for g, c in zip(d["gdp_index"], d["co2_index"])]
+    d["color"] = d["category"].map(_TAPIO_COLORS)
 
     _HIDDEN_LABELS = {
-        "Estonia", "Czechia", "Croatia", "Norway",
-        "Netherlands", "Luxembourg", "Slovakia", "Belgium", 
-        "Finland", "Bulgaria", "Germany", "United Kingdom",
-    } 
+        "Estonia", "Czechia", "Croatia", "Norway", "Netherlands", "Luxembourg",
+        "Slovakia", "Belgium", "Finland", "Bulgaria", "Germany", "United Kingdom",
+    }
     _TEXTPOS_OVERRIDES = {
-        "Ukraine": "bottom center", "Latvia": "bottom center",
-        "Denmark": "bottom center", "Switzerland": "bottom center", 
-        "Sweden": "bottom center", "Hungary": "bottom center", "Greece": "middle left",
+        "Ukraine": "bottom center", "Latvia": "bottom center", "Denmark": "bottom center",
+        "Switzerland": "bottom center", "Sweden": "bottom center", "Hungary": "bottom center",
+        "Greece": "middle left",
     }
 
-    def scatter(d, visible):
-        return go.Scatter(
-            x=d["gdp_index"],
-            y=d["co2_index"],
-            mode="markers+text",
-            visible=visible,
-            showlegend=False,
-            marker=dict(color=d["color"], size=13, line=dict(width=1, color="#ffffff")),
-            text=d["country"].map(lambda c: "" if c in _HIDDEN_LABELS else c),
-            textposition=d["country"].map(lambda c: _TEXTPOS_OVERRIDES.get(c, "top center")),
-            textfont=dict(size=12, color=INK),
-            customdata=d[["country", "category", "elasticity"]],
-            hovertemplate=("<b>%{customdata[0]}</b><br>GDP %{x:.0f} · CO₂ %{y:.0f}<br>"
-                           "%{customdata[1]} (e = %{customdata[2]:.2f})<extra></extra>"),
-        )
-
-    a, b = prep(df_2000), prep(df_1990)
-    fig = go.Figure(
-            [scatter(a, True), 
-             scatter(b, False)
-            ])
-    fig.add_hline(y=100, line=dict(color=INK, width=1, dash='dash'), annotation_text='CO₂ baseline')
-    fig.add_vline(x=100, line=dict(color=INK, width=1, dash='dash'), annotation_text=' GDP baseline')
+    fig = go.Figure(go.Scatter(
+        x=d["gdp_index"], y=d["co2_index"], mode="markers+text", showlegend=False,
+        marker=dict(color=d["color"], size=13, line=dict(width=1, color="#ffffff")),
+        text=d["country"].map(lambda c: "" if c in _HIDDEN_LABELS else c),
+        textposition=d["country"].map(lambda c: _TEXTPOS_OVERRIDES.get(c, "top center")),
+        textfont=dict(size=12, color=INK),
+        customdata=d[["country", "category", "elasticity"]],
+        hovertemplate=("<b>%{customdata[0]}</b><br>GDP %{x:.0f} · CO₂ %{y:.0f}<br>"
+                       "%{customdata[1]} (e = %{customdata[2]:.2f})<extra></extra>"),
+    ))
+    fig.add_hline(y=100, line=dict(color=ACCENT, width=2, dash="dash"), annotation_text="<b>CO₂ baseline</b>")
+    fig.add_vline(x=100, line=dict(color=ACCENT, width=2, dash="dash"), annotation_text="<b> GDP baseline</b>")
     fig.add_annotation(x=0.98, y=0.07, xref="paper", yref="paper",
-                       text="GDP ↑ · CO₂ ↓ = decoupling", showarrow=False,
-                       font=dict(color=ACCENT, size=15), xanchor="right")
-    fig.update_layout(updatemenus=[dict(
-        type="buttons", direction="right", x=0, y=1.14, xanchor="left", yanchor="top",
-        pad=dict(b=4), showactive=True,
-        buttons=[
-            dict(label="Since 2000", method="restyle", args=[{"visible": [True, False]}]),
-            dict(label="Since 1990", method="restyle", args=[{"visible": [False, True]}]),
-        ],
-    )])
-    return _apply_theme(fig, 
-                        height=590, 
-                        margin=dict(l=8, r=28, t=52, b=8),
+                       text="<b>GDP ↑ · CO₂ ↓ = decoupling</b>", showarrow=False, xanchor="right")
+    fig.update_annotations(font=dict(color=ACCENT, size=15))
+    return _apply_theme(fig, height=590, margin=dict(l=8, r=28, t=12, b=8),
                         xaxis_title="GDP index (base year = 100)",
                         yaxis_title="Territorial CO₂ index (base year = 100)")
 
@@ -204,15 +222,17 @@ def build_consumption_gap(df):
                 y=d["country"], 
                 orientation="h", 
                 marker_color=colors,
-                text=d["gap_per_capita"].map(lambda v: f"{v:.1f}"),
+                text=d["gap_per_capita"].map(lambda v: f" {v:.1f}"),
                 textposition="outside",
+                textfont=dict(size=16, color=colors, weight=700),
                 customdata=d[["co2_per_capita", "consumption_co2_per_capita"]],
                 hovertemplate=("<b>%{y}</b><br>territorial CO₂: %{customdata[0]:.1f} t/cap <br>consumption CO₂: %{customdata[1]:.1f} t/cap"
                                 "<br>gap: %{x:.1f} t/cap<extra></extra>"),
     ))
-    fig.add_vline(x=0, line=dict(color=INK, width=1))
+    fig.add_vline(x=0, line=dict(color=INK, width=2))
     return _apply_theme(fig, 
-                        height=700,
+                        height=710,
+                        bargap=0.3,
                         xaxis_title="Difference between consumption CO₂ and territorial CO₂ per capita (tonnes/capita)",
                         yaxis_title=None)
 
@@ -226,13 +246,15 @@ def build_fake_decoupler_board(df, top=15):
                 y=d["country"], 
                 orientation="h", 
                 marker_color=WARM,
-                text=d["trade_co2_share"].map(lambda v: f"{v:.0f}%"),
+                text=d["trade_co2_share"].map(lambda v: f" +{v:.0f}%"),
+                textfont=dict(size=14, color=WARM, weight=700),
                 textposition="outside",
                 cliponaxis=False,
                 hovertemplate="<b>%{y}</b><br>net imported emissions: %{x:.0f}% of territorial<extra></extra>",
     ))
     return _apply_theme(fig,
-                        height=520,
+                        height=630,
+                        bargap=0.36,
                         xaxis_title="Net imported emissions (% of territorial CO₂)",
                         yaxis_title=None)
 
@@ -286,35 +308,6 @@ def build_decoupler_board(df):
                         yaxis_title=None)
 
 
-def build_top_reducers(df) -> go.Figure:
-    """Horizontal bar: top-10 European countries by % CO₂/capita cut over the last decade."""
-    d = df.sort_values("reduction")
-    fig = go.Figure(
-        go.Bar(
-            x=d["reduction"],
-            y=d["country"],
-            orientation="h",
-            marker_color=ACCENT,
-            customdata=d[["prev_co2_per_capita", "co2_per_capita"]],
-            hovertemplate=(
-                "<b> %{y}</b><br>"
-                " CO₂ / capita: %{customdata[0]:.2f} -> %{customdata[1]:.2f} t <br>"
-                " Reduction: %{x:.2f}%<extra></extra>"
-            ),
-            text=d["reduction"].map(lambda v: f"{v:.0f}%"),
-            textposition="outside",
-            cliponaxis=False,
-        )
-    )
-    return _apply_theme(
-        fig,
-        height=430,
-        bargap=0.33,
-        xaxis_title="CO₂ per capita reduction over 10 years (%)",
-        yaxis_title=None,
-    )
-
-
 # Context - Chapter 1
 def build_urban_by_income(df) -> go.Figure:
     """Changes in urbanization percentage and average CO₂ emissions by income group"""
@@ -333,8 +326,8 @@ def build_urban_by_income(df) -> go.Figure:
                     x=df["income_group"],
                     y=df["avg_urban_pct"],
                     mode="lines+markers",
-                    line=dict(color=WARM),
-                    marker=dict(size=16),
+                    line=dict(color=WARM, width=3),
+                    marker=dict(color=WARM, size=15),
                     customdata=df[["countries"]],
                     hovertemplate=( "<b>%{x}</b><br>Countries: %{customdata[0]}<br>"
                                     "Average urbanization: %{y:.0f}%"
@@ -342,7 +335,7 @@ def build_urban_by_income(df) -> go.Figure:
                     ),
                     showlegend=False,
                 ), secondary_y=True)
-    fig.update_xaxes(categoryorder="array", categoryarray=order)
+    fig.update_xaxes(categoryorder="array", categoryarray=order, showgrid=False)
     fig = _apply_theme(
         fig,
         height=560,
@@ -356,10 +349,10 @@ def build_urban_by_income(df) -> go.Figure:
 
 
 _INCOME_COLORS = {
-    "High income":          "#01853A",
-    "Upper middle income":  "#BDD96A",
-    "Lower middle income":  "#F1B72F",
-    "Low income":           "#DF2E25",
+    "High income":          "#14532d",
+    "Upper middle income":  "#7fae5a",
+    "Lower middle income":  "#d59a4a",
+    "Low income":           "#c2603f",
 }
 def build_density_vs_emissions(df) -> go.Figure:
     """Population density and territorial CO₂ per capita"""
@@ -401,27 +394,27 @@ def build_urban_vs_air_pollution(df) -> go.Figure:
     r = eu["urban_population_pct"].corr(eu["pm25_exposure"])
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(          # rest of the world
+    fig.add_trace(go.Scatter(          # rest of the world (charts.js lightens MUTED on the dark panel)
         x=row["urban_population_pct"], y=row["pm25_exposure"], mode="markers", name="Rest of world",
         marker=dict(size=9, color=MUTED, opacity=0.35),
         customdata=row[["country"]], hovertemplate=HOVER,
     ))
-    fig.add_trace(go.Scatter(          # Europe
+    fig.add_trace(go.Scatter(          # Europe regression, drawn under the rings
+        x=xs, y=slope * xs + intercept, mode="lines",
+        line=dict(color=EU_ON_DARK, width=2, dash="dash"), hoverinfo="skip", showlegend=False,
+    ))
+    fig.add_trace(go.Scatter(          # Europe — hollow rings so they read on the dark panel
         x=eu["urban_population_pct"], y=eu["pm25_exposure"], mode="markers", name="Europe",
-        marker=dict(size=15, color=ACCENT, line=dict(width=1, color="#ffffff")),
+        marker=dict(size=14, color="rgba(0,0,0,0)", line=dict(width=2, color=EU_ON_DARK)),
         customdata=eu[["country"]], hovertemplate=HOVER,
     ))
-    fig.add_trace(go.Scatter(
-        x=xs, y=slope * xs + intercept, mode="lines",
-        line=dict(color=ACCENT, width=2, dash="dash"), hoverinfo="skip", showlegend=False,
-    ))
     fig.add_annotation(x=0.98, y=0.95, xref="paper", yref="paper", xanchor="right",
-                       text=f"Europe: r = {r:.2f}", showarrow=False, font=dict(color=ACCENT, size=14))
+                       text=f"Europe: r = {r:.2f}", showarrow=False, font=dict(color=EU_ON_DARK, size=14))
     fig = _apply_theme(
         fig,
         height=620,
-        margin=dict(l=8, r=28, t=40, b=8),
-        legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="left", x=0),
+        margin=dict(l=8, r=28, t=12, b=8),
+        showlegend=False,
         xaxis_title="Urban population (%)",
         yaxis_title="PM2.5 exposure (µg/m³)",
     )
@@ -538,11 +531,12 @@ def build_cars_by_size_band(df) -> go.Figure:
     fig = go.Figure(go.Bar(
         x=list(g.index),
         y=g["median_cars"],
-        marker_color=ACCENT,
+        marker_color=EU_ON_DARK,
         customdata=g[["n_cities"]],
         hovertemplate=("<b>%{x}</b><br>Median: %{y:.0f} cars/1000 people<br>"
                        "Cities: %{customdata[0]}<extra></extra>"),
         text=g["median_cars"].map(lambda v: f"{v:.0f}"),
+        textfont=dict(size=15),
         textposition="outside",
         cliponaxis=False,
     ))
@@ -561,17 +555,17 @@ def build_cars_by_size_band(df) -> go.Figure:
 _TPI_VERDICT_COLORS = {
     "Genuine": ACCENT,
     "Fake":    WARM,
-    "Special": "#e0a24a",
-    "Other":   "#9aa7b1",
+    "Special": "#d59a4a",   # amber
+    "Other":   "#a89e8a",   # warm stone
 }
 
 _TPI_COMPONENT_COLORS = {
-    "honesty":         ACCENT,
-    "co2_reduction":   "#3f7d8c",
-    "abs_consumption": "#8a6d9c",
-    "energy_clean":    "#e0a24a",
-    "prosperity":      "#6b7d8c",
-    "momentum":        "#c2cbbf",
+    "honesty":         ACCENT,      # pine - the 0.40 anchor
+    "co2_reduction":   "#3f7f88",   # teal
+    "abs_consumption": "#9c6f84",   # mauve
+    "energy_clean":    "#d59a4a",   # amber
+    "prosperity":      "#7f8a72",   # sage
+    "momentum":        "#cbbfa6",   # sand
 }
 
 
@@ -580,58 +574,36 @@ def _tpi_headline(df):
     return df[~df["flag"].fillna("").str.contains("!")]
 
 
-def build_tpi_score(df_2000, df_1990, top=15) -> go.Figure:
-    """The TPI leaderboard: top-15 by final score, coloured by decoupling verdict, 1990/2000 toggle.
+def build_tpi_score(df, top=15) -> go.Figure:
+    """One TPI leaderboard figure for a single base year (top-15 by final score,
+    coloured by decoupling verdict). Data-quality-flagged countries are dropped;
+    boundary cases keep a trailing asterisk."""
+    d = _tpi_headline(df).sort_values("final", ascending=False).head(top).iloc[::-1].copy()
+    d["label"] = d["country"] + d["flag"].fillna("").map(lambda f: " *" if "*" in f else "")
+    d["color"] = d["verdict"].map(_TPI_VERDICT_COLORS)
+    d["scoretext"] = d["final"].map(lambda v: f"{v:.1f}")
 
-    Data-quality-flagged countries (IRL/LUX/MLT) are excluded from the headline ranking per NB08;
-    boundary cases (NOR) are kept and marked with a trailing asterisk.
-    """
-    def prep(df):
-        d = _tpi_headline(df).sort_values("final", ascending=False).head(top).iloc[::-1].copy()
-        d["label"] = d["country"] + d["flag"].fillna("").map(lambda f: " *" if "*" in f else "")
-        d["color"] = d["verdict"].map(_TPI_VERDICT_COLORS)
-        d["scoretext"] = d["final"].map(lambda v: f"{v:.1f}")
-        return d
-
-    a, b = prep(df_2000), prep(df_1990)
     fig = go.Figure(go.Bar(
-        x=a["final"], y=a["label"], orientation="h",
-        marker_color=a["color"], cliponaxis=False, showlegend=False,
-        text=a["scoretext"], textposition="outside",
-        textfont=dict(size=13, color=INK, weight=700),
-        customdata=a[["verdict"]],
+        x=d["final"], y=d["label"], orientation="h",
+        marker_color=d["color"], cliponaxis=False, showlegend=False,
+        text=d["scoretext"], textposition="outside",
+        textfont=dict(size=13, color=INK),
+        customdata=d[["verdict"]],
         hovertemplate="<b>%{y}</b><br>TPI score: %{x:.1f}<br>Verdict: %{customdata[0]}<extra></extra>",
     ))
-
-    present = [v for v in ("Genuine", "Fake", "Special", "Other")
-               if (a["verdict"] == v).any() or (b["verdict"] == v).any()]
-    for v in present:
-        fig.add_trace(go.Bar(
-            x=[None], 
-            y=[None], 
-            name=v,
-            marker_color=_TPI_VERDICT_COLORS[v], hoverinfo="skip"
-        ))
-
-    def frame(d):
-        return [{"x": [d["final"].tolist()], "y": [d["label"].tolist()],
-                 "marker.color": [d["color"].tolist()], "text": [d["scoretext"].tolist()],
-                 "customdata": [d[["verdict"]].values.tolist()]}, [0]]
-
+    # verdict legend via dummy traces (Plotly renders the legend)
+    for v in ("Genuine", "Fake", "Special", "Other"):
+        if (d["verdict"] == v).any():
+            fig.add_trace(go.Bar(x=[None], y=[None], name=v,
+                                 marker_color=_TPI_VERDICT_COLORS[v], hoverinfo="skip"))
     fig.update_layout(
         barmode="overlay", barcornerradius=4,
-        updatemenus=[dict(
-            type="buttons", direction="right", x=0, y=1.14, xanchor="left", yanchor="top",
-            pad=dict(b=4), showactive=True,
-            buttons=[
-                dict(label="Since 2000", method="restyle", args=frame(a)),
-                dict(label="Since 1990", method="restyle", args=frame(b)),
-            ],
-        )],
         legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="left", x=0),
     )
-    return _apply_theme(fig, height=630, bargap=0.4, margin=dict(l=8, r=28, t=52, b=8),
-                        xaxis_title="Transition Performance Index")
+    fig = _apply_theme(fig, height=630, bargap=0.4, margin=dict(l=8, r=44, t=52, b=36),
+                       xaxis_title="Transition Performance Index")
+    fig.update_xaxes(range=[0, float(d["final"].max()) * 1.14])
+    return fig
 
 
 def build_rank_shift(df_2000, df_1990) -> go.Figure:
