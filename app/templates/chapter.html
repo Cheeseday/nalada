@@ -2,42 +2,125 @@
 {% block title %}Nalada. {{ chapter.title }}{% endblock %}
 
 {% block content %}
-<section class="chapter-header">
-  <div class="wrap">
-    <span class="scope-badge" title="Scope: {{ chapter.scope_label }}">
-      {{ chapter.scope }} {{ chapter.scope_label }}
-    </span>
-    <p class="eyebrow">Chapter {{ '%02d' % chapter.num }}</p>
-    <h1>{{ chapter.title }}</h1>
-    <p class="hero-lead">{{ chapter.tagline }}</p>
+{#  Editorial chapter layout.
+    - chapter.stat / chapter.stat_label  -> optional big pull-stat in the header
+    - section headings get a big 01/02/03 numeral (grouped by block.section)
+    - each figure gets a "Figure 0X" label
+    - the LAST chart of the chapter renders on a dark "finale" panel
+    - chapter.conclusion (safe HTML) -> bold line under the dark chart
+    - blocks with fig_json_alt render a custom base-year toggle (see charts.js)  #}
+
+<section class="chapter-hero reveal">
+  <div class="wrap chapter-hero-grid">
+    <div class="chapter-hero-main">
+      <p class="eyebrow">Chapter {{ '%02d' % chapter.num }} · {{ chapter.scope_label }}</p>
+      <h1>{{ chapter.title }}</h1>
+      <p class="hero-lead">{{ chapter.tagline }}</p>
+    </div>
+    {% if chapter.stat %}
+    <div class="chapter-stat">
+      <div class="chapter-stat-num">{{ chapter.stat }}</div>
+      {% if chapter.stat_label %}<p class="chapter-stat-label">{{ chapter.stat_label }}</p>{% endif %}
+    </div>
+    {% endif %}
   </div>
 </section>
 
-<section class="wrap chapter-body">
-  {% if chapter_intro %}<p class="chapter-intro">{{ chapter_intro }}</p>{% endif %}
-  {% set ns = namespace(section=None) %}
+<div class="wrap chapter-body">
+  {% if chapter_intro %}<p class="chapter-intro reveal">{{ chapter_intro }}</p>{% endif %}
+
+  {% set ns = namespace(section=None, snum=0, fignum=0, open=false) %}
   {% for block in charts %}
+
     {% if block.section and block.section != ns.section %}
+      {% if ns.open %}</section>{% endif %}
       {% set ns.section = block.section %}
-      <h2 class="section-label">{{ block.section }}</h2>
-      {% if section_intros and section_intros.get(block.section) %}
-        <p class="section-intro">{{ section_intros[block.section] }}</p>
-      {% endif %}
+      {% set ns.snum = ns.snum + 1 %}
+      <section class="chapter-section">
+        <div class="section-head reveal">
+          <span class="section-num">{{ '%02d' % ns.snum }}</span>
+          <div class="section-head-body">
+            <h2>{{ block.section }}</h2>
+            {% if section_intros and section_intros.get(block.section) %}
+            <p class="section-intro">{{ section_intros[block.section] }}</p>
+            {% endif %}
+          </div>
+        </div>
+      {% set ns.open = true %}
     {% endif %}
-  <figure class="chart-block">
-    <div class="chart-head">
-      <span class="scope-badge">{{ block.scope }}</span>
-      <h3>{{ block.title }}</h3>
-    </div>
-    <div class="chart js-plot" data-plot="fig-{{ block.id }}"></div>
-    <script type="application/json" id="fig-{{ block.id }}">{{ block.fig_json | safe }}</script>
-    <figcaption class="chart-takeaway">{{ block.takeaway }}</figcaption>
-  </figure>
+
+    {% set ns.fignum = ns.fignum + 1 %}
+    <figure class="chart-block reveal{% if loop.last %} chart-block--dark{% endif %}">
+      <div class="chart-head">
+        <span class="fig-label">Figure {{ '%02d' % ns.fignum }}</span>
+        <h3>{{ block.title }}</h3>
+      </div>
+      <div class="chart-surface">
+        {% if block.fig_json_alt and block.toggle %}
+        <div class="chart-controls">
+          <div class="base-toggle">
+            {% for opt in block.toggle %}
+            <button type="button" class="base-toggle-btn{% if loop.first %} is-active{% endif %}"
+                    data-base="{{ opt.base }}"
+                    data-fig="fig-{{ block.id }}{% if not loop.first %}-alt{% endif %}">{{ opt.label }}</button>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+        <div class="chart js-plot" data-plot="fig-{{ block.id }}"{% if block.fig_json_alt %} data-plot-alt="fig-{{ block.id }}-alt"{% endif %}></div>
+        {% if block.legend %}
+        <div class="chart-legend">
+          {% for item in block.legend %}
+          <span class="legend-item"><span class="legend-swatch{% if item.round %} round{% endif %}{% if item.line %} line{% endif %}{% if item.ring %} ring{% endif %}" style="{% if item.ring %}border-color: {{ item.color }};{% else %}background: {{ item.color }};{% endif %}"></span>{{ item.label }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <script type="application/json" id="fig-{{ block.id }}">{{ block.fig_json | safe }}</script>
+      {% if block.fig_json_alt %}<script type="application/json" id="fig-{{ block.id }}-alt">{{ block.fig_json_alt | safe }}</script>{% endif %}
+      <figcaption class="chart-takeaway">
+        <span class="takeaway-kicker">Summary</span>
+        <p>{{ block.takeaway }}</p>
+      </figcaption>
+      {% if loop.last and chapter.conclusion %}<p class="chart-conclusion reveal">{{ chapter.conclusion | safe }}</p>{% endif %}
+    </figure>
+
   {% endfor %}
-  {% if chapter_outro %}<p class="chapter-outro">{{ chapter_outro }}</p>{% endif %}
-</section>
+  {% if ns.open %}</section>{% endif %}
+
+  {% if chapter_outro %}<p class="chapter-intro reveal" style="margin-top:2rem;">{{ chapter_outro }}</p>{% endif %}
+
+  {# ---- Prev / next chapter pager ---- #}
+  {% set prev_ch = chapters | selectattr('num', 'equalto', chapter.num - 1) | first %}
+  {% set next_ch = chapters | selectattr('num', 'equalto', chapter.num + 1) | first %}
+  <nav class="chapter-pager reveal" aria-label="Chapter navigation">
+    {% if prev_ch %}
+    <a class="pager-link prev" href="{{ url_for('main.chapter', slug=prev_ch.slug) }}">
+      <span class="pager-dir">← Previous</span>
+      <span class="pager-target"><span class="num">{{ '%02d' % prev_ch.num }}</span><span class="title">{{ prev_ch.title }}</span></span>
+    </a>
+    {% else %}
+    <a class="pager-link prev" href="{{ url_for('main.index') }}">
+      <span class="pager-dir">← Back</span>
+      <span class="pager-target"><span class="title">Overview</span></span>
+    </a>
+    {% endif %}
+    {% if next_ch %}
+    <a class="pager-link next" href="{{ url_for('main.chapter', slug=next_ch.slug) }}">
+      <span class="pager-dir">Next →</span>
+      <span class="pager-target"><span class="num">{{ '%02d' % next_ch.num }}</span><span class="title">{{ next_ch.title }}</span></span>
+    </a>
+    {% else %}
+    <a class="pager-link next" href="{{ url_for('main.index') }}">
+      <span class="pager-dir">Back to ↑</span>
+      <span class="pager-target"><span class="title">Overview</span></span>
+    </a>
+    {% endif %}
+  </nav>
+</div>
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
 {% endblock %}

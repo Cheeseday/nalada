@@ -1,30 +1,45 @@
 {% extends 'base.html' %}
-{% block title %}Nalada - growth, cities &amp; carbon{% endblock %}
+{% block title %}Nalada - decoupling analysis{% endblock %}
 
 {% block content %}
 <section class="hero">
-  <div class="wrap">
-    <p class="eyebrow">A data story in four chapters</p>
-    <h1 class="hero-title">
-      Does economic growth <em>have</em> to mean more&nbsp;CO₂?
-    </h1>
-    <p class="hero-lead">
-      Some countries grew their economies while cutting emissions. But is Europe's
-      “green growth” real - or are the emissions simply exported to somewhere the
-      accounting can't see?
-    </p>
-    <div class="hero-cta">
-      <a class="btn btn-primary" href="{{ url_for('main.chapter', slug='decoupling') }}">
-        Start with the twist -
-      </a>
-      <a class="btn btn-ghost" href="#chapters">See all four chapters</a>
+  <div class="wrap hero-grid">
+    <div class="hero-main">
+      <p class="eyebrow">A data story in four chapters</p>
+      <h1 class="hero-title">
+        27 European countries say they decoupled. <em>Did they, though?</em>
+      </h1>
+      <p class="hero-lead">
+        Growth up, emissions down - on paper. But territorial accounting counts only
+        what a country burns at home, not what its people buy from elsewhere. Switch to
+        the consumption lens and the honest picture shows up.
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="{{ url_for('main.chapter', slug='context') }}">
+          Start reading <span aria-hidden="true">→</span>
+        </a>
+        <a class="btn btn-ghost" href="#chapters">See all four chapters</a>
+      </div>
     </div>
+
+    <aside class="hero-stat reveal">
+      <p class="hero-stat-figure">
+        <span class="hero-stat-num is-claim">27</span>
+        <span class="hero-stat-arrow" aria-hidden="true">→</span>
+        <span class="hero-stat-num is-genuine">{{ genuine_count }}</span>
+      </p>
+      <p class="hero-stat-label">
+        of {{ total_count }} countries report decoupling - but only {{ genuine_count }}
+        genuinely did, once you count the emissions they import.
+      </p>
+      <p class="hero-stat-foot">The rest look green on paper. Chapter 02 names who offshored the difference.</p>
+    </aside>
   </div>
 </section>
 
 <section class="twist">
   <div class="wrap">
-    <div class="twist-card">
+    <div class="twist-card reveal">
       <h2>The thread that connects everything</h2>
       <p>
         <strong>Territorial</strong> emissions - what a country burns inside its
@@ -36,12 +51,36 @@
   </div>
 </section>
 
+<section class="glance">
+  <div class="wrap">
+    <div class="glance-row reveal">
+      <div class="glance-item">
+        <span class="glance-k">Main scope</span>
+        <span class="glance-v">{{ total_count }} European countries · 1 global chapter</span>
+      </div>
+      <div class="glance-item">
+        <span class="glance-k">Major concept</span>
+        <span class="glance-v">Territorial vs consumption CO₂</span>
+      </div>
+      <div class="glance-item">
+        <span class="glance-k">Data</span>
+        <span class="glance-v">OWID · World Bank · Eurostat</span>
+      </div>
+      <div class="glance-item">
+        <span class="glance-k">Purpose</span>
+        <span class="glance-v">A portfolio data story</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="chapters" class="chapters">
   <div class="wrap">
-    <h2 class="section-title">The four chapters</h2>
+    <h2 class="section-title reveal">The four chapters</h2>
     <div class="card-grid">
       {% for ch in chapters %}
-      <a class="chapter-card" href="{{ url_for('main.chapter', slug=ch.slug) }}">
+      <a class="chapter-card reveal" data-reveal-delay="{{ loop.index0 * 90 }}"
+         href="{{ url_for('main.chapter', slug=ch.slug) }}">
         <div class="card-top">
           <span class="chapter-num">{{ '%02d' % ch.num }}</span>
           <span class="scope-badge" title="Scope: {{ ch.scope_label }}">
@@ -50,9 +89,43 @@
         </div>
         <h3 class="card-title">{{ ch.title }}</h3>
         <p class="card-tagline">{{ ch.tagline }}</p>
-        <span class="card-link">Read chapter -></span>
+        <span class="card-link">Read chapter →</span>
       </a>
       {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="limits">
+  <div class="wrap">
+    <div class="limits-card reveal">
+      <h2>The limits of this analysis</h2>
+      <p class="limits-lead">
+        This story accuses others of giving flattering reviews - so it has its caveats.
+        Before you trust one rating, there're four things to keep in mind.
+      </p>
+      <div class="limits-grid">
+        <p class="limit-item">
+          <strong>Consumption figures are modelled, not measured.</strong> Consumption CO₂ is reconstructed
+          with multi-regional input-output models that estimate the CO₂ contained in trade. Models
+          inherit uncertainty from global trade tables and sector aggregation - 
+          they reflect the trend, not a precise level.
+        </p>
+        <p class="limit-item">
+          <strong>Small/trade-heavy economies.</strong> Ireland's profit-shifted GDP,
+          Luxembourg's cross-border workforce and tiny Malta distort per capita comparisons, so
+          I flagged or set aside them rather than ranked by objective criteria.
+        </p>
+        <p class="limit-item">
+          <strong>The scope is deliberately narrow.</strong> This is a Europe-only study - just 34
+          countries - so the sample is small and the patterns describe Europe, not the world at large.
+        </p>
+        <p class="limit-item">
+          <strong>The honesty weighting is a choice.</strong> Scoring the index 40% on honesty is 
+          a deliberate decision, not a law of nature - different weights would reshuffle the board 
+          (i suspect, not as significantly as you might imagine).
+        </p>
+      </div>
     </div>
   </div>
 </section>

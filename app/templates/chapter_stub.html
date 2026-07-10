@@ -2,14 +2,13 @@
 {% block title %}Nalada. {{ chapter.title }}{% endblock %}
 
 {% block content %}
-<section class="chapter-header">
-  <div class="wrap">
-    <span class="scope-badge" title="Scope: {{ chapter.scope_label }}">
-      {{ chapter.scope }} {{ chapter.scope_label }}
-    </span>
-    <p class="eyebrow">Chapter {{ '%02d' % chapter.num }}</p>
-    <h1>{{ chapter.title }}</h1>
-    <p class="hero-lead">{{ chapter.tagline }}</p>
+<section class="chapter-hero reveal">
+  <div class="wrap chapter-hero-grid">
+    <div class="chapter-hero-main">
+      <p class="eyebrow">Chapter {{ '%02d' % chapter.num }} · {{ chapter.scope }} {{ chapter.scope_label }}</p>
+      <h1>{{ chapter.title }}</h1>
+      <p class="hero-lead">{{ chapter.tagline }}</p>
+    </div>
   </div>
 </section>
 

@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Nalada{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <!-- Plotly loaded once per page; chapter charts call Plotly.newPlot into their divs. -->
-  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
 <body>
   <header class="site-header">
     <div class="wrap header-inner">
       <a class="brand" href="{{ url_for('main.index') }}">
+        <svg class="brand-mark" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+          <polyline points="3,16 12,11.5 21,7" fill="none" stroke="#14532d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></polyline>
+          <polyline points="3,9.5 12,12.5 21,17" fill="none" stroke="#c2603f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></polyline>
+        </svg>
         Nalada<span class="brand-dot">.</span>
       </a>
       <nav class="site-nav" aria-label="Chapters">
@@ -32,15 +34,53 @@
 
   <footer class="site-footer">
     <div class="wrap footer-inner">
-      <p class="footer-sources">
-        Sources: <strong>Our World in Data</strong> (CO₂ &amp; consumption),
-        <strong>World Bank</strong> (urbanization &amp; income),
-        <strong>Eurostat</strong> (city statistics).
-      </p>
-      <p class="muted">A portfolio project on growth, cities &amp; carbon.</p>
+      <div class="footer-grid">
+
+        <div class="footer-col">
+          <div class="footer-id-row">
+            <span class="footer-id-mark">
+              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+                <polyline points="3,16 12,11.5 21,7" fill="none" stroke="#14532d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                <polyline points="3,9.5 12,12.5 21,17" fill="none" stroke="#c2603f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></polyline>
+              </svg>
+            </span>
+            <div>
+              <div class="footer-id-name">Aleś Kiryluškin</div>
+              <div class="footer-id-role">Data Analyst</div>
+            </div>
+          </div>
+          <p class="footer-blurb">I enjoy turning raw data into clear insights that help people make better decisions. This project is a snapshot of that journey</p>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-heading">Feedback</div>
+          <p>Are you spotted something off, or want the methodology behind a chart? I'd sincerely like to hear it, just text me!</p>
+          <a class="footer-cta" href="mailto:aleksandrkirilushkin@gmail.com">Say hello <span aria-hidden="true">→</span></a>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-heading">Links</div>
+          <div class="footer-links">
+            <a class="footer-link" href="https://github.com/Cheeseday">GitHub <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="footer-link" href="https://www.linkedin.com/in/ales-kirylushkin/">LinkedIn <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="footer-link" href="https://www.instagram.com/ales_kiryluskin/">Instagram <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="footer-link" href="#">Résumé (PDF) <span class="ext" aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p class="footer-sources">
+          Sources: <strong>Our World in Data</strong> (Territorial CO₂ &amp; consumption CO₂),<br>
+          <strong>World Bank</strong> (urbanization &amp; income),
+          <strong>Eurostat</strong> (city statistics).
+        </p>
+        <p class="footer-colophon">© {{ 2026 }} Aleś Kiryluškin</p>
+      </div>
     </div>
   </footer>
 
+  <script src="{{ url_for('static', filename='js/reveal.js') }}" defer></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>
