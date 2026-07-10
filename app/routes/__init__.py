@@ -31,17 +31,22 @@ CHAPTERS = [
                     "lens reveals who genuinely decoupled and who just offshored their emissions.",
         "stat": "27/34",
         "stat_label": "European countries grew GDP while territorial CO₂ fell",
+        "conclusion": ("Most of the analyzed countries 'passed the test' - they are indeed <em>striving to decouple</em> "
+                       "economic growth from emissions. However, some have <span class=\"hot\">shifted</span> "
+                       "the direction of their emissions rather than their volume."),
     },
     {
         "num": 3, 
         "slug": "structure", 
         "title": "Structure",
-        "scope": "🇪🇺➕", 
-        "scope_label": "Europe+",
-        "tagline": "Do genuine decouplers build cities differently? I tested it "
-                   "rigorously - and the real driver is city size, not honesty.",
+        "scope": "🇪🇺", 
+        "scope_label": "564 cities",
+        "tagline": "Do genuine decouplers build cities differently?",
         "stat": "size",
         "stat_label": "not honesty, is what actually predicts a European city's car dependency",
+        "conclusion": ("Genuine decouplers don't build greener cities. What predicts a European city's "
+                       "car dependency is its <span class=\"hot\">size</span> - not its country's "
+                       "<em>honesty</em>."),
     },
     {
         "num": 4, 
@@ -49,12 +54,12 @@ CHAPTERS = [
         "title": "Synthesis",
         "scope": "🇪🇺➕", 
         "scope_label": "Europe+",
-        "tagline": "The Transition Performance Index: an honesty-weighted ranking of "
-                   "who is actually transitioning - with the caveats built in.",
+        "tagline": "The Transition Performance Index: blend of reducing trends and current state, "
+        "relative indexes and absolute numbers. And the punchline.",
         "stat": "40%",
-        "stat_label": "of the score is weighted on honesty — so offshoring emissions can't buy a good grade",
-        "conclusion": ("Even Europe's leaders are cutting at roughly <span class=\"hot\">half</span> "
-                       "the pace a fair share by 2050 demands. Relative virtue is <em>not</em> sufficiency."),
+        "stat_label": "of the score is weighted on honesty - so offshoring emissions isn't encouraged.",
+        "conclusion": ("Even European leaders are reducing emissions <span class=\"hot\">twice as slowly</span> "
+                       "as needed by 2050. Being at the top <em>doesn't</em> always mean doing enough."),
     },
 ]
 CHAPTERS_BY_SLUG = {c["slug"]: c for c in CHAPTERS}
@@ -126,7 +131,7 @@ _SEC_SIZE = "The real driver"
 # Chapter 4 narrative
 _SEC_RANK = "The ranking"
 _SEC_ANATOMY = "Anatomy of a score"
-_SEC_CAVEATS = "Two honest caveats - good enough?"
+_SEC_CAVEATS = "Are they good enough?"
 
 
 _CHAPTER_INTRO = {
@@ -141,15 +146,15 @@ _CHAPTER_INTRO = {
         "up to an honest look at what these countries actually consume."
     ),
     "structure": (
-        "Chapter 2 sorted Europe into genuine cutters and address-changers. The tempting next step "
-        "is to check whether that honesty shows up in how their cities are built - fewer cars, less "
-        "sprawl. This chapter runs that test, and reports what it found even though the answer is no."
+        "In the previous chapter, I sorted countries into groups based on their decoupling perfomance. "
+        "Now I'd like to test the hypothesis that 'genuine decoupling' countries are qualitatively changing "
+        "the behavior of urban residents: fewer cars, 'greener' infrastructure, etc."
     ),
     "synthesis": (
-        "Everything so far converges here. The Transition Performance Index rolls decoupling honesty, "
+        "Everything so far converges here. The Transition Performance Index combines decoupling honesty, "
         "absolute footprint, grid cleanliness, prosperity and pace into a single criterion-referenced "
-        "score - weighted 40% on honesty, so that offshoring emissions can't buy a good grade. But an "
-        "index is only as trustworthy as its caveats, so the chapter ends by turning the ranking on itself."
+        "score - weighted 40% on honesty, so that offshoring emissions can't get a good grade. An index deserves "
+        "trust only when it has a connection to reality. Does it have one? Let's find out together."
     ),
 }
 _SECTION_INTRO = {
@@ -179,35 +184,92 @@ _SECTION_INTRO = {
     },
     "structure": {
         _SEC_HYPOTHESIS: (
-            "If genuinely decoupling countries build differently, their cities should lean less on "
-            "cars. Here is the median for each country, colored according to the decoupling verdict."
+            "If genuinely decoupling countries build differently, their cities should be less dependent on "
+            "cars. Here is the median value for each country, colored according to the decoupling verdict."
         ),
         _SEC_TEST: (
-            "As a verdict, compare every city's car dependency side by side. If the hypothesis were correct - "
+            "As a verdict, compare the city's car dependency in each country. If the hypothesis were correct - "
             "the genuine block would be located clearly below all the others, without overlapping them."
         ),
         _SEC_SIZE: (
-            "Car dependency is tracked by size, not by decoupling level. The bigger the city, the fewer cars per person."
+            "Car dependency is tracked by city size, not by decoupling level. The bigger the city, the fewer cars per person."
         ),
     },
     "synthesis": {
         _SEC_RANK: (
-            "The headline ranking drops three countries whose numbers are distorted (Ireland's "
-            "profit-shifted GDP, Luxembourg's cross-border workforce, tiny Malta) and marks boundary "
-            "cases with an asterisk. Toggle the base year and watch how much of the post-Soviet lead "
-            "evaporates once the clock starts in 2000 instead of 1990."
+            "The headline ranking excludes three countries because its numbers are distorted (Ireland's "
+            "profit-shifted GDP, Luxembourg's cross-border workforce and tiny Malta) and boundary case "
+            "(Norway) is marked with an asterisk. Try to switch the base year and see how much the "
+            "advantage of the post-Soviet countries disappears if the counting starts in 2000 instead of 1990."
         ),
         _SEC_ANATOMY: (
-            "No two leaders climb the same way. Each top-15 score is broken into the weighted points "
-            "every component contributes - honesty is the tall green base, the rest stacks on top."
+            "No two scores are built the same way. Honesty is the tall green base, so it looks decisive - "
+            "yet the final totals sit close together. Treat a similar rank as a tie, not a clear win."
         ),
         _SEC_CAVEATS: (
-            "A high rank means 'transitioning well relative to Europe', not 'done'. Two final checks "
-            "keep the index honest: where each country actually sits today, and whether even the "
-            "leaders are cutting fast enough to matter."
+            "A high rank means 'ahead of the rest of Europe', not 'finished'. Two last checks keep the ranking honest: "
+            "where each country really stands today, and whether even the leaders are cutting fast enough."
         ),
     },
 }
+
+
+def _context_blocks():
+    """Chapter 1 - urbanization is often blamed for pollutions and cities look guilty, but in fact wealth drives emissions."""
+    ds, ch = data_service, charts
+    GL = "🌍 Global"
+    ACCUSED, DRIVER, TWIST = _SEC_ACCUSED, _SEC_DRIVER, _SEC_TWIST
+    income_legend = [
+        {"color": "#14532d", "label": "High income", "round": True},
+        {"color": "#7fae5a", "label": "Upper middle income", "round": True},
+        {"color": "#d59a4a", "label": "Lower middle income", "round": True},
+        {"color": "#c2603f", "label": "Low income", "round": True},
+    ]
+    return [
+        _chart_block(
+            "urban-by-income",
+            "Urbanization and CO₂ rise together across the world. Case closed?",
+            GL,
+            "Richer countries are both more urban and higher-emitting - in fact, one factor stimulates the other. "
+            "Due to that, urbanization may become an object of special attention.",
+            ch.build_urban_by_income(ds.get_co2_urban_by_income()),
+            section=ACCUSED,
+            legend=[{"color": "#14532d", "label": "Average CO₂/capita (tonnes)"},
+                    {"color": "#c2603f", "label": "Average urban population (%)", "line": True}],
+        ),
+        _chart_block(
+            "density-vs-emissions",
+            "Do dense countries pollute more?",
+            GL,
+            "Density isn't a causer here. Dense and sparse countries pollute in the same range.",
+            ch.build_density_vs_emissions(ds.get_density_vs_co2()),
+            section=DRIVER,
+            legend=income_legend,
+        ),
+        _chart_block(
+            "gdp-vs-co2",
+            "Does wealth predict emissions?",
+            GL,
+            "GDP per capita is the single strongest predictor of CO₂ emissions. (r ≈ 0.75) - the correlation with GDP is "
+            "far stronger than with density or urbanisation indexes. This is the real factor today.",
+            ch.build_gdp_vs_co2(ds.get_gdp_vs_co2()),
+            section=DRIVER,
+            legend=income_legend,
+        ),
+        _chart_block(
+            "urban-vs-pm25",
+            "How does urbanization influence air pollution?",
+            GL,
+            "Globally, this relationship is weak and noisy - some highly urbanized countries have "
+            "the dirtiest air. But if you look at European countries (highlighted), the situation "
+            "changes dramatically: the more urban the country, the lower the PM2.5 level. Air quality "
+            "depends on what you burn, not population density.",
+            ch.build_urban_vs_air_pollution(ds.get_urban_vs_air_pollution()),
+            section=TWIST,
+            legend=[{"color": "#9db3a5", "label": "Rest of world", "round": True},
+                    {"color": "#c2603f", "label": "Europe", "ring": True}],
+        ),
+    ]
 
 
 def _decoupling_blocks():
@@ -294,104 +356,54 @@ def _decoupling_blocks():
     ]
 
 
-def _context_blocks():
-    """Chapter 1 - urbanization is often blamed for pollutions and cities look guilty, but in fact wealth drives emissions."""
-    ds, ch = data_service, charts
-    GL = "🌍 Global"
-    ACCUSED, DRIVER, TWIST = _SEC_ACCUSED, _SEC_DRIVER, _SEC_TWIST
-    income_legend = [
-        {"color": "#14532d", "label": "High income", "round": True},
-        {"color": "#7fae5a", "label": "Upper middle income", "round": True},
-        {"color": "#d59a4a", "label": "Lower middle income", "round": True},
-        {"color": "#c2603f", "label": "Low income", "round": True},
-    ]
-    return [
-        _chart_block(
-            "urban-by-income",
-            "Urbanization and CO₂ rise together across the world. Case closed?",
-            GL,
-            "Richer countries are both more urban and higher-emitting - in fact, one factor stimulates the other. "
-            "Due to that, urbanization may become an object of special attention.",
-            ch.build_urban_by_income(ds.get_co2_urban_by_income()),
-            section=ACCUSED,
-            legend=[{"color": "#14532d", "label": "Average CO₂/capita (tonnes)"},
-                    {"color": "#c2603f", "label": "Average urban population (%)", "line": True}],
-        ),
-        _chart_block(
-            "density-vs-emissions",
-            "Do dense countries pollute more?",
-            GL,
-            "Density isn't a causer here. Dense and sparse countries pollute in the same range.",
-            ch.build_density_vs_emissions(ds.get_density_vs_co2()),
-            section=DRIVER,
-            legend=income_legend,
-        ),
-        _chart_block(
-            "gdp-vs-co2",
-            "Does wealth predict emissions?",
-            GL,
-            "GDP per capita is the single strongest predictor of CO₂ emissions. (r ≈ 0.75) - the correlation with GDP is "
-            "far stronger than with density or urbanisation indexes. This is the real factor today.",
-            ch.build_gdp_vs_co2(ds.get_gdp_vs_co2()),
-            section=DRIVER,
-            legend=income_legend,
-        ),
-        _chart_block(
-            "urban-vs-pm25",
-            "How does urbanization influence air pollution?",
-            GL,
-            "Globally, this relationship is weak and noisy - some highly urbanized countries have "
-            "the dirtiest air. But if you look at European countries (highlighted), the situation "
-            "changes dramatically: the more urban the country, the lower the PM2.5 level. Air quality "
-            "depends on what you burn, not population density.",
-            ch.build_urban_vs_air_pollution(ds.get_urban_vs_air_pollution()),
-            section=TWIST,
-            legend=[{"color": "#9db3a5", "label": "Rest of world", "round": True},
-                    {"color": "#c2603f", "label": "Europe", "ring": True}],
-        ),
-    ]
-
-
 def _structure_blocks():
     """Chapter 3 - the null result: honesty doesn't shape cities; city size does."""
     ds, ch = data_service, charts
     EU = "🇪🇺 Europe"
     HYPOTHESIS, TEST, SIZE = _SEC_HYPOTHESIS, _SEC_TEST, _SEC_SIZE
 
-    # Decoupling-verdict key for the by-country bars — only the verdicts that appear,
-    # in canonical order (mirrors charts._VERDICT_ORDER/_LABEL/_COLORS).
     city_cars = ds.get_city_cars_by_country()
-    _verdict_key = [("genuine", "Genuine", "#14532d"), ("net_exporter", "Net exporter", "#d59a4a"),
-                    ("no_decoupling", "No decoupling", "#a89e8a"), ("fake", "Fake", "#c2603f"),
-                    ("degrowth", "Degrowth", "#8a6d9c")]
+    n_countries = len(city_cars)
+    n_cities = int(city_cars["n_cities"].sum())
+    _verdict_key = [
+        ("genuine", "Genuine", "#14532d"), 
+        ("net_exporter", "Net exporter", "#d59a4a"),
+        ("no_decoupling", "No decoupling", "#a89e8a"),
+        ("fake", "Fake", "#c2603f"),
+        ("degrowth", "Degrowth", "#8a6d9c")
+    ]
     present = set(city_cars["verdict"])
     car_verdict_legend = [{"color": c, "label": lbl}
                           for key, lbl, c in _verdict_key if key in present]
     return [
         _chart_block(
             "median-city-cars-by-country",
-            "Do honest countries have less car-dependent cities?",
+            "Do 'honest' countries have less car-dependent cities?",
             EU,
-            "Each bar is a country's median cars per 1000 people, coloured by its decoupling "
-            "verdict. As we can see, the specifics of the country affect much more than decoupling level.",
+            "Each bar is a country's median amount of cars per 1,000 people, coloured by its decoupling "
+            "verdict. As we can see, the specifics of the country affect much more than decoupling level. "
+            f"A scope caveat: Eurostat publishes city statistics for only {n_countries} of the 34 countries "
+            f"({n_cities} cities), and none of them are 'no decoupling' or 'degrowth' cases - so this "
+            "chapter tests the hypothesis on a subset of Europe, not the full set.",
             ch.build_city_cars_by_country(city_cars),
             section=HYPOTHESIS,
             legend=car_verdict_legend,
         ),
         _chart_block(
             "cars-distr-by-verdict",
-            "The rigorous test: cars by verdict",
+            "Median amount of cars by decoupling verdict",
             EU,
             "Divide each city by its country's verdict and the distributions overlap almost "
-            "entirely - genuine's median is even slightly higher, not lower than the fake one.",
+            "entirely - genuine's median is even slightly higher, not lower than the fake one. "
+            "So, the hypothesis has not been confirmed.",
             ch.build_cars_dist_by_verdict(ds.get_city_cars_snapshot()),
             section=TEST,
         ),
         _chart_block(
             "cars-by-size-band",
-            "Does car dependency fall when city size is changing?",
+            "Does car dependency fall when city size changes?",
             EU,
-            "Bucketed by population, median number of cars per 1000 people falls monotonically as cities grow."
+            "Bucketed by population, median amount of cars per 1,000 people falls monotonically as cities grow. "
             "Size, not honesty, is what actually predicts how car-dependent a European city is.",
             ch.build_cars_by_size_band(ds.get_city_cars_snapshot()),
             section=SIZE,
@@ -409,8 +421,12 @@ def _synthesis_blocks():
 
     # Decoupling-verdict key (mirrors charts._TPI_VERDICT_COLORS). Square swatches for the
     # bar chart, round for the two scatter charts, so each key matches its marks.
-    _verdicts = [("Genuine", "#14532d"), ("Fake", "#c2603f"),
-                 ("Special", "#d59a4a"), ("Other", "#a89e8a")]
+    _verdicts = [
+        ("Genuine", "#14532d"),
+        ("Fake", "#c2603f"),
+        ("Special", "#d59a4a"),
+        ("Other", "#a89e8a")
+    ]
     verdict_bars = [{"color": c, "label": l} for l, c in _verdicts]
     verdict_dots = [{"color": c, "label": l, "round": True} for l, c in _verdicts]
     return [
@@ -418,9 +434,9 @@ def _synthesis_blocks():
             "tpi-leaderboard",
             "The honest ranking: leaders by Transition Performance Index",
             EU,
-            "Sweden and Finland (genuine) top the list; Portugal is the quiet surprise. The clay bars "
-            "matter most - the UK, Denmark and France score well on grid, prosperity and pace, but are "
-            "flagged fake decouplers, so honesty pulls them down the board.",
+            "Sweden and Finland (genuine ones) at the top of the list, Portugal is quite a surprise here. "
+            "The clay bars are the most interesting cases - the UK, Denmark and France score well on prosperity"
+            " and emissions cut, but they're flagged as fake decouplers, so honesty pulls them down the board.",
             ch.build_tpi_score(tpi_2000),
             ch.build_tpi_score(tpi_1990),
             section=RANK,
@@ -428,11 +444,11 @@ def _synthesis_blocks():
         ),
         _chart_block(
             "rank-shift",
-            "How much of the lead is a post-Soviet windfall?",
+            "Post-Soviet recession reshaffles the ranking",
             EU,
-            "Lines sloping down to the right lost rank when the base year moves from 1990 to 2000 - "
-            "their advantage was built on the early-1990s industrial collapse, not recent policy. "
-            "Portugal climbs against the tide; several Eastern economies fall.",
+            "Lines sloping down to the right lose their rank when the base year is moved from 1990 to 2000 - "
+            "their advantage was built on the early-1990s industrial collapse, not intentional policy. "
+            "Portugal climbs against the tide. Netherlands goes down.",
             ch.build_rank_shift(tpi_2000, tpi_1990),
             section=RANK,
             legend=verdict_dots,
@@ -441,14 +457,13 @@ def _synthesis_blocks():
             "tpi-weighted-contributions",
             "What drives each score? Weighted contributions (2000 base, top 15)",
             EU,
-            "Honesty - the 0.40-weighted green base - is what separates the leaders. Countries with "
-            "similar totals often get there through different mixes: a clean grid here, high prosperity "
-            "there, a strong recent trend somewhere else.",
+            "What lifts the leaders is honesty - the big green base under every bar. Still, "
+            "two countries can finish neck and neck by very different routes: a clean grid here, "
+            "more wealth there, a strong recent push somewhere else.",
             ch.build_tpi_weighted_contribution(tpi_2000),
             section=ANATOMY,
-            # Stacked-segment key - mirrors charts._TPI_COMPONENT_COLORS + the segment labels.
             legend=[
-                {"color": "#14532d", "label": "Honesty (consumption cut − fake-decoupling penalty)"},
+                {"color": "#14532d", "label": "Honesty (consumption cut - fake-decoupling penalty)"},
                 {"color": "#3f7f88", "label": "Territorial CO₂/capita cut"},
                 {"color": "#9c6f84", "label": "Consumption CO₂/capita"},
                 {"color": "#d59a4a", "label": "Grid cleanliness"},
@@ -458,11 +473,11 @@ def _synthesis_blocks():
         ),
         _chart_block(
             "tpi-journey",
-            "Journey vs destination: a good score is not a clean footprint",
+            "Journey vs destination: a good score isn't a clean footprint",
             EU,
-            "Every country still sits far from the 2 t/capita fair-share line (top). A high TPI marks "
-            "the countries transitioning best relative to Europe - the fastest movers, not the ones "
-            "that have already arrived.",
+            "Almost all countries remain far from the 2 t/capita fair-share target. A high TPI marks "
+            "the countries that are adapting best compared to Europe - they're moving faster, but "
+            "they're still on the way.",
             ch.build_tpi_journey(tpi_2000),
             section=CAVEATS,
             legend=verdict_dots,
@@ -471,9 +486,8 @@ def _synthesis_blocks():
             "tpi-sufficiency",
             "Sufficiency: are even the leaders fast enough?",
             EU,
-            "The punchline of the whole project. For the top-15, the pace actually achieved since 2010 "
-            "(slate) falls short of the pace required to reach 2 t/capita by 2050 (red) almost "
-            "everywhere. Relative virtue is not sufficiency.",
+            "This is the punchline of the whole project. With current pace only Portugal, among the top-15, "
+            "will reach the climate-neutral aim (2t/capita) by 2050. Honestly, we have a long way to go.",
             ch.build_tpi_sufficiency(ds.get_tpi_sufficiency()),
             section=CAVEATS,
             legend=[
@@ -483,12 +497,13 @@ def _synthesis_blocks():
         ),
     ]
 
+
 def _charts_for(slug):
     """Ordered chart blocks for a chapter, or [] if it isn't built yet (falls back to the stub)."""
-    if slug == "decoupling":
-        return _decoupling_blocks()
     if slug == "context":
         return _context_blocks()
+    if slug == "decoupling":
+        return _decoupling_blocks()
     if slug == "structure":
         return _structure_blocks()
     if slug == "synthesis":
@@ -506,6 +521,7 @@ def chapter(slug):
     return render_template(template, chapter=ch, charts=blocks,
                            chapter_intro=_CHAPTER_INTRO.get(slug),
                            section_intros=_SECTION_INTRO.get(slug, {}))
+
 
 @main.route('/.well-known/appspecific/com.chrome.devtools.json')
 def _chrome_devtools_probe():

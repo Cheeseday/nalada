@@ -8,7 +8,7 @@ from ._theme import (EU_ON_DARK, _apply_theme, _hex_to_rgba,
 
 
 def build_city_cars_by_country(df) -> go.Figure:
-    """Horizontal bar: median cars/1000 per country, coloured by decoupling verdict"""
+    """Horizontal bar: median amount of cars per 1000 people per country, coloured by decoupling verdict"""
     df = df.copy()
     df["color"] = df["verdict"].map(_VERDICT_COLORS)
     fig = go.Figure(go.Bar(
@@ -35,7 +35,7 @@ def build_city_cars_by_country(df) -> go.Figure:
 
 
 def build_cars_dist_by_verdict(df) -> go.Figure:
-    """Box plot of cars/1000 by verdict: genuine sits slightly above fake - the honesty signal isn't there."""
+    """Box plot of cars per 1000 people by decoupling verdict: genuine sits slightly above fake - the real driver isn't there."""
     order = [v for v in ("genuine", "fake", "net_exporter") if (df["verdict"] == v).any()]
     fig = go.Figure()
     for v in order:
@@ -63,7 +63,7 @@ def build_cars_dist_by_verdict(df) -> go.Figure:
 
 
 def build_cars_by_size_band(df) -> go.Figure:
-    """Bars: median cars/1000 by city-size band. Size drives the reduction"""
+    """Bars: median amount of cars per 1000 people by city-size band. Size drives the reduction"""
     BINS = [0, 100_000, 250_000, 500_000, 1_000_000, np.inf]
     LABELS = ["<100k", "100-250k", "250-500k", "500k-1M", ">1M"]
     d = df.copy()

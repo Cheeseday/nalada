@@ -62,7 +62,7 @@ def build_tpi_score(df, top=15) -> go.Figure:
 
 
 def build_rank_shift(df_2000, df_1990) -> go.Figure:
-    """Slope chart: each country's TPI rank under a 1990 vs 2000 base year (the Soviet-windfall test).
+    """Slope chart: each country's TPI rank under a 1990 vs 2000 base year (the post-Soviet deindustrialization).
 
     All countries are shown (not just the headline top-15); a line sloping down to the right
     lost rank when the clock starts in 2000, i.e. its lead leaned on the post-Soviet collapse.
@@ -83,9 +83,9 @@ def build_rank_shift(df_2000, df_1990) -> go.Figure:
             mode="lines+markers+text",
             text=["", row["country"]],
             textposition="middle right",
-            textfont=dict(size=11, color=INK),
+            textfont=dict(size=13, color=INK),
             line=dict(color=color, width=2),
-            marker=dict(size=8, color=color),
+            marker=dict(size=10, color=color),
             cliponaxis=False,
             hovertemplate=(f"<b>{row['country']}</b> · {row['verdict']}"
                            "<br>%{x}: rank %{y}<extra></extra>"),
@@ -140,8 +140,8 @@ def build_tpi_weighted_contribution(df, top=15) -> go.Figure:
                       "energy_clean", "prosperity", "momentum", "final"]]
     hover = ("<b>%{x}</b><br>"
              "Honesty: %{customdata[0]:.1f} pts<br>"
-             "Territorial CO₂ cut: %{customdata[1]:.1f} pts<br>"
-             "Absolute consumption: %{customdata[2]:.1f} pts<br>"
+             "Territorial CO₂/cap cut: %{customdata[1]:.1f} pts<br>"
+             "Consumption CO₂/capita: %{customdata[2]:.1f} pts<br>"
              "Grid cleanliness: %{customdata[3]:.1f} pts<br>"
              "GDP/capita: %{customdata[4]:.1f} pts<br>"
              "Momentum: %{customdata[5]:.1f} pts<br>"
