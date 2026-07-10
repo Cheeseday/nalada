@@ -1,4 +1,4 @@
--- Top 10 countries by % reduction in CO₂/capita over the last 10 years
+-- Top 15 countries by % reduction in CO₂/capita over the last 10 years
 SELECT
 	r.country,
 	r.year,
@@ -36,4 +36,4 @@ WHERE
 	r.year = 2024
 ORDER BY
 	r.reduction DESC
-LIMIT 10;
+LIMIT 15;

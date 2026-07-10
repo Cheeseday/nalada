@@ -1,5 +1,5 @@
 -- TPI sufficiency: actual vs required annual pace of consumption-CO₂/capita cuts,
--- for the TPI top-12 (2000 base, data-quality '!' flags excluded).
+-- for the TPI top-15 (2000 base, data-quality '!' flags excluded).
 -- Actual pace  = compound annual change 2010 'till the latest year with data.
 -- Required pace = geometric rate needed to reach 2 t/capita by 2050.
 WITH cons AS (
@@ -76,4 +76,4 @@ WHERE
 	AND COALESCE(t.flag, '') NOT LIKE '%!%'
 ORDER BY
 	t.final DESC
-LIMIT 12;
+LIMIT 15;
