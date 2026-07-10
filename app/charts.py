@@ -97,7 +97,7 @@ _VERDICT_COLORS = {
 }
 
 def build_top_reducers(df) -> go.Figure:
-    """Horizontal bar: top-10 European countries by % CO₂/capita cut over the last decade."""
+    """Horizontal bar: top-15 European countries by % CO₂/capita cut over the last decade."""
     d = df.sort_values("reduction")
     fig = go.Figure(
         go.Bar(
@@ -119,9 +119,9 @@ def build_top_reducers(df) -> go.Figure:
     )
     return _apply_theme(
         fig,
-        height=430,
+        height=620,
         bargap=0.36,
-        xaxis_title="CO₂ per capita reduction over 10 years (%)",
+        xaxis_title="CO₂ per capita reduction over the last 10 years (%)",
         yaxis_title=None,
     )
 
@@ -230,11 +230,42 @@ def build_consumption_gap(df):
                                 "<br>gap: %{x:.1f} t/cap<extra></extra>"),
     ))
     fig.add_vline(x=0, line=dict(color=INK, width=2))
-    return _apply_theme(fig, 
+    return _apply_theme(fig,
                         height=710,
                         bargap=0.3,
                         xaxis_title="Difference between consumption CO₂ and territorial CO₂ per capita (tonnes/capita)",
                         yaxis_title=None)
+
+
+def build_hero_teaser(df) -> go.Figure:
+    """Compact landing-hero dumbbell: territorial (reported) vs consumption (actual)
+    CO₂/capita for the countries with the widest gap - a one-glance hook for the
+    flattering-vs-honest twist. Malta (an extreme outlier) is dropped so the axis
+    isn't skewed."""
+    d = (df[df["country"] != "Malta"]
+         .nlargest(5, "gap_per_capita")
+         .sort_values("gap_per_capita"))
+    fig = go.Figure()
+    for _, r in d.iterrows():
+        fig.add_trace(go.Scatter(
+            x=[r["co2_per_capita"], r["consumption_co2_per_capita"]],
+            y=[r["country"], r["country"]],
+            mode="lines", line=dict(color=GRID, width=3),
+            hoverinfo="skip", showlegend=False))
+    fig.add_trace(go.Scatter(
+        x=d["co2_per_capita"], y=d["country"], mode="markers",
+        marker=dict(color=ACCENT, size=13),
+        hovertemplate="<b>%{y}</b><br>Territorial (reported): %{x:.1f} t/cap<extra></extra>",
+        showlegend=False))
+    fig.add_trace(go.Scatter(
+        x=d["consumption_co2_per_capita"], y=d["country"], mode="markers",
+        marker=dict(color=WARM, size=13),
+        hovertemplate="<b>%{y}</b><br>Consumption (actual): %{x:.1f} t/cap<extra></extra>",
+        showlegend=False))
+    fig = _apply_theme(fig, height=330, margin=dict(l=8, r=20, t=8, b=40),
+                       xaxis_title="CO₂ per capita (tonnes)", yaxis_title=None)
+    fig.update_xaxes(rangemode="tozero")
+    return fig
 
 
 def build_fake_decoupler_board(df, top=15):
@@ -343,8 +374,9 @@ def build_urban_by_income(df) -> go.Figure:
         xaxis_title=None,
         yaxis_title="Average CO₂/capita (tonnes)",
     )
-    fig.update_yaxes(rangemode="tozero", secondary_y=False)
-    fig.update_yaxes(title_text="Average urban population (%)", rangemode="tozero", secondary_y=True)
+    # Left (primary) axis carries the CO₂ bars; right (secondary) axis carries the urban line.
+    fig.update_yaxes(rangemode="tozero", color='#26231D', secondary_y=False)
+    fig.update_yaxes(title_text="Average urban population (%)", secondary_y=True)
     return fig
 
 
@@ -383,7 +415,7 @@ def build_density_vs_emissions(df) -> go.Figure:
 
 
 def build_urban_vs_air_pollution(df) -> go.Figure:
-    """Urban % vs PM2.5: noisy worldwide, but clearly negative within Europe (highlighted, r ≈ -0.51)."""
+    """Urban % vs PM2.5: the correlation is noisy worldwide, but clearly negative within Europe (highlighted, r ≈ -0.51)."""
     HOVER = ("<b>%{customdata[0]}</b><br> Urban population: %{x:.0f}%<br>"
              " PM2.5 exposure: %{y:.1f}µg/m³<extra></extra>")
     eu = df[df["is_europe"]].dropna(subset=["urban_population_pct", "pm25_exposure"])
@@ -395,21 +427,41 @@ def build_urban_vs_air_pollution(df) -> go.Figure:
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(          # rest of the world (charts.js lightens MUTED on the dark panel)
-        x=row["urban_population_pct"], y=row["pm25_exposure"], mode="markers", name="Rest of world",
+        x=row["urban_population_pct"], 
+        y=row["pm25_exposure"], 
+        mode="markers", 
+        name="Rest of world",
         marker=dict(size=9, color=MUTED, opacity=0.35),
-        customdata=row[["country"]], hovertemplate=HOVER,
+        customdata=row[["country"]], 
+        hovertemplate=HOVER,
     ))
     fig.add_trace(go.Scatter(          # Europe regression, drawn under the rings
-        x=xs, y=slope * xs + intercept, mode="lines",
-        line=dict(color=EU_ON_DARK, width=2, dash="dash"), hoverinfo="skip", showlegend=False,
+        x=xs, 
+        y=slope * xs + intercept, 
+        mode="lines",
+        line=dict(color=WARM, width=2, dash="dash"), 
+        hoverinfo="skip", 
+        showlegend=False,
     ))
     fig.add_trace(go.Scatter(          # Europe — hollow rings so they read on the dark panel
-        x=eu["urban_population_pct"], y=eu["pm25_exposure"], mode="markers", name="Europe",
-        marker=dict(size=14, color="rgba(0,0,0,0)", line=dict(width=2, color=EU_ON_DARK)),
-        customdata=eu[["country"]], hovertemplate=HOVER,
+        x=eu["urban_population_pct"], 
+        y=eu["pm25_exposure"], 
+        mode="markers", 
+        name="Europe",
+        marker=dict(size=14, color="rgba(0, 0, 0, 0)", line=dict(width=2, color=WARM)),
+        customdata=eu[["country"]], 
+        hovertemplate=HOVER,
     ))
-    fig.add_annotation(x=0.98, y=0.95, xref="paper", yref="paper", xanchor="right",
-                       text=f"Europe: r = {r:.2f}", showarrow=False, font=dict(color=EU_ON_DARK, size=14))
+    fig.add_annotation(
+        x=0.98, 
+        y=0.95, 
+        xref="paper", 
+        yref="paper", 
+        xanchor="right",
+        text=f"Europe: r = {r:.2f}", 
+        showarrow=False, 
+        font=dict(color=WARM, size=19, weight=700),
+    )
     fig = _apply_theme(
         fig,
         height=620,
@@ -447,7 +499,7 @@ def build_gdp_vs_co2(df) -> go.Figure:
     )
     fig.update_xaxes(type="log")
     fig.add_annotation(x=0.03, y=0.96, xref="paper", yref="paper", xanchor="left",
-                       text=f"r = {r:.2f}", showarrow=False, font=dict(color=ACCENT, size=16))
+                       text=f"r = {r:.2f}", showarrow=False, font=dict(color=ACCENT, size=19, weight=700)) # weight=700 
     return fig
 
 
@@ -469,23 +521,12 @@ def build_city_cars_by_country(df) -> go.Figure:
         cliponaxis=False,
         showlegend=False,
     ))
-    
-    for v in _VERDICT_ORDER:
-        if (df["verdict"] == v).any():
-            fig.add_trace(go.Bar(
-                x=[None], 
-                y=[None], 
-                name=_VERDICT_LABEL[v],
-                marker_color=_VERDICT_COLORS[v], 
-                hoverinfo="skip"
-            ))
+    # Verdict colour key is rendered as a custom HTML legend under the chart (see routes).
     return _apply_theme(
         fig,
         height=590,
-        margin=dict(l=8, r=28, t=40, b=8),
+        margin=dict(l=8, r=28, t=8, b=8),
         bargap=0.4,
-        barmode="overlay",
-        legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="left", x=0),
         xaxis_title="Median cars per 1000 people",
         yaxis_title=None,
     )
@@ -591,17 +632,14 @@ def build_tpi_score(df, top=15) -> go.Figure:
         customdata=d[["verdict"]],
         hovertemplate="<b>%{y}</b><br>TPI score: %{x:.1f}<br>Verdict: %{customdata[0]}<extra></extra>",
     ))
-    # verdict legend via dummy traces (Plotly renders the legend)
-    for v in ("Genuine", "Fake", "Special", "Other"):
-        if (d["verdict"] == v).any():
-            fig.add_trace(go.Bar(x=[None], y=[None], name=v,
-                                 marker_color=_TPI_VERDICT_COLORS[v], hoverinfo="skip"))
-    fig.update_layout(
-        barmode="overlay", barcornerradius=4,
-        legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="left", x=0),
+    fig.update_layout(barcornerradius=4)
+    fig = _apply_theme(
+        fig, 
+        height=630, 
+        bargap=0.4, 
+        margin=dict(l=8, r=44, t=8, b=36),
+        xaxis_title="Transition Performance Index"
     )
-    fig = _apply_theme(fig, height=630, bargap=0.4, margin=dict(l=8, r=44, t=52, b=36),
-                       xaxis_title="Transition Performance Index")
     fig.update_xaxes(range=[0, float(d["final"].max()) * 1.14])
     return fig
 
@@ -631,18 +669,13 @@ def build_rank_shift(df_2000, df_1990) -> go.Figure:
             textfont=dict(size=11, color=INK),
             line=dict(color=color, width=2),
             marker=dict(size=8, color=color),
+            cliponaxis=False,
             hovertemplate=(f"<b>{row['country']}</b> · {row['verdict']}"
                            "<br>%{x}: rank %{y}<extra></extra>"),
             showlegend=False,
         ))
-    for v in ("Genuine", "Fake", "Special", "Other"):
-        if (shift["verdict"] == v).any():
-            fig.add_trace(go.Scatter(
-                x=[None], y=[None], mode="markers", name=v,
-                marker=dict(size=10, color=_TPI_VERDICT_COLORS[v]), hoverinfo="skip"))
     return _apply_theme(
-        fig, height=730, margin=dict(l=8, r=96, t=40, b=8),
-        legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="left", x=0),
+        fig, height=730, margin=dict(l=8, r=150, t=8, b=8),
         xaxis_title=None,
         yaxis=dict(title="TPI rank (1 = best)", autorange="reversed"))
 
@@ -698,6 +731,7 @@ def build_tpi_weighted_contribution(df, top=15) -> go.Figure:
             text=contrib["final"].map(lambda v: f"{v:.0f}") if name == last else None,
             textposition="outside",
             textfont=dict(size=13, color=INK, weight=700),
+            showlegend=False,
         ))
     fig.update_layout(barmode="stack")
     return _apply_theme(
@@ -705,7 +739,6 @@ def build_tpi_weighted_contribution(df, top=15) -> go.Figure:
         height=660,
         xaxis_title=None,
         yaxis_title="TPI points (weighted)",
-        legend=dict(orientation="h", yanchor="top", y=-0.12, xanchor="center", x=0.5),
     )
 
 
@@ -716,34 +749,43 @@ def build_tpi_journey(df) -> go.Figure:
     The 2 t/capita fair-share line makes the point that a good score isn't a clean footprint yet.
     """
     fig = go.Figure()
+    _TEXTPOS_OVERRIDES = {
+        "LTU": "bottom center", "DEU": "bottom center", "GRC": "middle right",
+        "FIN": "middle right", "IRL": "middle right", "NOR": "middle right", 
+        "SWE": "middle right", "PRT": "middle right",
+    }
     for v in ("Genuine", "Fake", "Special", "Other"):
         sub = df[df["verdict"] == v]
         if sub.empty:
             continue
         fig.add_trace(go.Scatter(
-            x=sub["composite"], y=sub["cons_latest"],
-            mode="markers+text", name=v,
-            text=sub["iso_code"], textposition="top center",
+            x=sub["composite"], 
+            y=sub["cons_latest"],
+            mode="markers+text", 
+            name=v,
+            text=sub["iso_code"], 
+            textposition=sub["iso_code"].map(lambda c: _TEXTPOS_OVERRIDES.get(c, "top center")),
             textfont=dict(size=10, color=INK),
             marker=dict(size=13, color=_TPI_VERDICT_COLORS[v], line=dict(width=1, color="#ffffff")),
             customdata=sub[["country"]],
             hovertemplate=("<b>%{customdata[0]}</b><br>TPI score: %{x:.1f}<br>"
                            "Consumption CO₂: %{y:.1f} t/capita<extra></extra>"),
+            showlegend=False,
         ))
     fig.add_hline(y=2, line=dict(color=ACCENT, width=2, dash="dash"),
                   annotation_text="2 t/capita fair-share target",
                   annotation_position="top right", annotation_font_color=ACCENT)
+    fig.update_annotations(font=dict(size=15, weight=700))
     return _apply_theme(
-        fig, 
-        height=620, 
-        margin=dict(l=8, r=28, t=40, b=8),
-        legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="left", x=0),
+        fig,
+        height=620,
+        margin=dict(l=8, r=28, t=8, b=8),
         xaxis_title="TPI score (2000 base)",
         yaxis=dict(title="Consumption CO₂ per capita (t, latest)", autorange="reversed"))
 
 
 def build_tpi_sufficiency(df) -> go.Figure:
-    """Grouped bars: actual vs required annual pace of consumption-CO₂ cuts for the TPI top-12.
+    """Grouped bars: actual vs required annual pace of consumption-CO₂ cuts for the TPI top-15.
 
     Actual pace (slate) below required pace (red) = a high-ranking country still off a Paris-
     compatible path. Relative virtue is not sufficiency.
@@ -752,25 +794,30 @@ def build_tpi_sufficiency(df) -> go.Figure:
     fig = go.Figure()
     fig.add_trace(go.Bar(
         name="Actual pace (from 2010 to the latest)",
-        x=d["iso_code"], y=d["actual_cut_pct"], marker_color=MUTED,
+        x=d["country"], 
+        y=d["actual_cut_pct"], 
+        marker_color=MUTED,
         customdata=d[["country", "required_cut_pct"]],
         hovertemplate=("<b>%{customdata[0]}</b><br>Actual: %{y:.1f}%/year cut<br>"
                        "Required: %{customdata[1]:.1f}%/year<extra></extra>"),
+        showlegend=False,
     ))
     fig.add_trace(go.Bar(
         name="Required for 2t by 2050",
-        x=d["iso_code"], y=d["required_cut_pct"], marker_color=WARM,
+        x=d["country"], 
+        y=d["required_cut_pct"], 
+        marker_color=WARM,
         customdata=d[["country", "actual_cut_pct"]],
         hovertemplate=("<b>%{customdata[0]}</b><br>Required: %{y:.1f}%/year<br>"
                        "Actual: %{customdata[1]:.1f}%/year cut<extra></extra>"),
+        showlegend=False,
     ))
     fig.update_layout(barmode="group", bargap=0.3, bargroupgap=0.08)
-    fig.update_xaxes(categoryorder="array", categoryarray=d["iso_code"].tolist())
+    fig.update_xaxes(categoryorder="array", categoryarray=d["country"].tolist())
     return _apply_theme(
-        fig, 
-        height=560, 
-        margin=dict(l=8, r=28, t=40, b=8),
-        legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="left", x=0),
+        fig,
+        height=560,
+        margin=dict(l=8, r=28, t=8, b=8),
         xaxis_title=None,
         yaxis_title="Annual reduction rate (%/year, positive = cutting)"
     )
