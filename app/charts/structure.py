@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from ._theme import (EU_ON_DARK, _apply_theme, _hex_to_rgba,
-                     _VERDICT_LABEL, _VERDICT_COLORS)
+                     _VERDICT_ORDER, _VERDICT_LABEL, _VERDICT_COLORS)
 
 
 def build_city_cars_by_country(df) -> go.Figure:
@@ -36,7 +36,7 @@ def build_city_cars_by_country(df) -> go.Figure:
 
 def build_cars_dist_by_verdict(df) -> go.Figure:
     """Box plot of cars per 1000 people by decoupling verdict: genuine sits slightly above fake - the real driver isn't there."""
-    order = [v for v in ("genuine", "fake", "net_exporter") if (df["verdict"] == v).any()]
+    order = [v for v in _VERDICT_ORDER if (df["verdict"] == v).any()]
     fig = go.Figure()
     for v in order:
         sub = df[df["verdict"] == v]

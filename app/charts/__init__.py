@@ -10,6 +10,7 @@ Everything is re-exported here so callers can keep using `charts.build_*`.
 from ._theme import (
     INK, MUTED, ACCENT, ACCENT_DARK, WARM, GRID, GRID_A, BLACK,
     FONT, BORDER_RADIUS, EU_ON_DARK,
+    _VERDICT_ORDER, _VERDICT_LABEL, _VERDICT_COLORS,
 )
 from .context import (
     build_urban_by_income,

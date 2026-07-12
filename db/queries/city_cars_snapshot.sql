@@ -23,7 +23,7 @@ WHERE
 	AND
 	cs.cars_per_1000 IS NOT NULL
 	AND
-	dc.verdict IN ('genuine', 'fake', 'net_exporter')
+	dc.verdict IN ('genuine', 'partial', 'fake', 'net_exporter', 'no_decoupling')
 	AND
 	dc.caveat IS NULL
 ORDER BY

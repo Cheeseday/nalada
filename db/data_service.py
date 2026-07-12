@@ -109,8 +109,13 @@ def get_city_cars_by_country(snap_year: int = 2018) -> pd.DataFrame:
 
 
 def get_tpi_leaderboard(base_year: int = 2000) -> pd.DataFrame:
-    """TPI leaderboard (NB08), ranked by final score. base_year 2000 = headline, 1990 = contrast."""
-    return _run("tpi_scores", base_year=base_year)
+    """TPI leaderboard (NB08), ranked by final score. base_year 2000 = headline, 1990 = contrast.
+
+    The `verdict` column is overridden with the canonical decoupler_class verdict (NB04), so the
+    Chapter 4 colours speak the same genuine/partial/fake vocabulary as Chapters 2 and 3"""
+    df = _run("tpi_scores", base_year=base_year)
+    canon = get_decoupler_class()[["iso_code", "verdict"]]
+    return df.drop(columns=["verdict"]).merge(canon, on="iso_code", how="left")
 
 
 def get_tpi_sufficiency() -> pd.DataFrame:

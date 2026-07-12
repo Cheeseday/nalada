@@ -228,18 +228,22 @@ def build_decoupler_board(df):
         sub = df[df["verdict"] == v]
         if sub.empty:
             continue
-        sub = sub.assign(caveat=sub["caveat"].fillna(""))
+        sub = sub.assign(
+            caveat=sub["caveat"].fillna(""),
+            # real-share is undefined for the tiers that never cut territorial CO₂ (no_decoupling/degrowth)
+            ratio_str=sub["honesty_ratio"].map(lambda v: f"{v:.2f}" if v == v else "n/a"),
+        )
         sub = sub.sort_values("co2_index").reset_index(drop=True)
         label = _VERDICT_LABEL[v]
         fig.add_trace(go.Scatter(
-            x=sub["co2_index"], 
-            y=[label] * len(sub), 
+            x=sub["co2_index"],
+            y=[label] * len(sub),
             mode="markers",
             name=label,
             marker=dict(color=_VERDICT_COLORS[v], size=14, line=dict(width=1.5, color="#ffffff")),
-            customdata=sub[["country", "gap", "trade_co2_share", "caveat"]],
-            hovertemplate=("<b>%{customdata[0]}</b><br>territorial CO₂ index %{x:.0f}"
-                           "<br>gap %{customdata[1]:.0f} · trade %{customdata[2]:.0f}%"
+            customdata=sub[["country", "ratio_str", "trade_co2_share", "caveat"]],
+            hovertemplate=("<b>%{customdata[0]}</b><br>Territorial CO₂ index: %{x:.0f}"
+                           "<br>Real-share: %{customdata[1]} · trade: %{customdata[2]:.0f}%"
                            "<br>%{customdata[3]}<extra></extra>"),
             showlegend=False,
         ))

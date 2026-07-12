@@ -8,6 +8,7 @@ SELECT
 	co2_index,
 	consumption_co2_index,
 	gap,
+	honesty_ratio,
 	trade_co2_share,
 	base_year
 FROM

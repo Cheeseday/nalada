@@ -27,9 +27,9 @@ CHAPTERS = [
         "title": "Decoupling",
         "scope": "🇪🇺➕", 
         "scope_label": "Europe+",
-        "tagline": "27 of 34 European countries cut CO₂ while their GDP grows. The consumption "
+        "tagline": "29 of 34 European countries cut CO₂ while their GDP grows. The consumption "
                     "lens reveals who genuinely decoupled and who just offshored their emissions.",
-        "stat": "27/34",
+        "stat": "29/34",
         "stat_label": "European countries grew GDP while territorial CO₂ fell",
         "conclusion": ("Most of the analyzed countries 'passed the test' - they are indeed <em>striving to decouple</em> "
                        "economic growth from emissions. However, some have <span class=\"hot\">shifted</span> "
@@ -39,8 +39,8 @@ CHAPTERS = [
         "num": 3, 
         "slug": "structure", 
         "title": "Structure",
-        "scope": "🇪🇺", 
-        "scope_label": "564 cities",
+        "scope": "🇪🇺",
+        "scope_label": "Eurostat cities",
         "tagline": "Do genuine decouplers build cities differently?",
         "stat": "size",
         "stat_label": "not honesty, is what actually predicts a European city's car dependency",
@@ -140,13 +140,13 @@ _CHAPTER_INTRO = {
         "pollution problem. Data don't suggest it and points to the real source."
     ),
     "decoupling": (
-        "On paper, Europe's climate policy looks impressive and quite optimistic: 27 out of 34 countries "
-        "have reduced their carbon dioxide consumption while their economies continued to grow. In this "
+        "On paper, Europe's climate policy looks impressive and quite optimistic: 29 out of 34 countries "
+        "have reduced their territorial carbon dioxide while their economies continued to grow. In this "
         "chapter, I'll examine this claim - first by giving it credit, and then by testing whether it holds "
         "up to an honest look at what these countries actually consume."
     ),
     "structure": (
-        "In the previous chapter, I sorted countries into groups based on their decoupling perfomance. "
+        "In the previous chapter, I sorted countries into groups based on their decoupling performance. "
         "Now I'd like to test the hypothesis that 'genuine decoupling' countries are qualitatively changing "
         "the behavior of urban residents: fewer cars, 'greener' infrastructure, etc."
     ),
@@ -178,7 +178,7 @@ _SECTION_INTRO = {
         ),
         _SEC_HONEST: (
             "Territorial numbers can't see emissions embodied in imports - so a country can look "
-            "quite clean by buying its goods from someone else."
+            "quite clean by buying its goods from someone else. "
             "Let's take a look at what the combination of consumption and territorial CO₂ gives us."
         ),
     },
@@ -291,8 +291,8 @@ def _decoupling_blocks():
             "emissions-peak", 
             "How far past peak?", 
             EU,
-            "Most of Europe is far below its all-time emissions peak, but for the post-Soviet economies"
-            "the peak was in 1985-89, which can be explained as a industrial collapse rather than a deliberate policy.",
+            "Most of Europe is far below its all-time emissions peak, but for the post-Soviet economies "
+            "the peak was in 1985-89, which can be explained as an industrial collapse rather than a deliberate policy.",
             ch.build_emissions_peak(ds.get_emissions_peak()), 
             section=FLAT
         ),
@@ -301,7 +301,7 @@ def _decoupling_blocks():
             "The trajectory, decade by decade", 
             EU,
             "Green colour = CO₂/capita fell that decade. Eastern Europe demonstrate a dramatic drop in the 1990s. "
-            "Western Europe's sustainable progress shows up in 2010s - the result of a deep review of environmental policy",
+            "Western Europe's sustainable progress shows up in 2010s - the result of a deep review of environmental policy.",
             ch.build_decade_change(ds.get_decade_change()), 
             section=FLAT
         ),
@@ -311,7 +311,8 @@ def _decoupling_blocks():
             EU,
             "The Tapio decoupling model, developed by Petri Tapio, measures the elasticity between economic growth "
             "(GDP) and environmental impact (CO₂ emissions). Bottom-right = GDP grew while territorial CO₂ fell - "
-            "that's decoupling. Try to toggle the base year: a 1990 base flatters the post-Soviet economies, 2000 gives the fairer view.",
+            "that's decoupling. Try to toggle the base year: a 1990 base flatters the post-Soviet economies, 2000 gives "
+            "the fairer view. Both views are measured at 2022, the latest year with GDP figures for every country.",
             ch.build_decoupling_index(ds.get_decoupling_index(2000)),
             ch.build_decoupling_index(ds.get_decoupling_index(1990)),
             section=FLAT,
@@ -346,10 +347,11 @@ def _decoupling_blocks():
         ),
         _chart_block(
             "verdict-board", 
-            "Genuine, fake, or not a decoupler at all?", 
+            "Genuine, fake, or not a decoupler at all?",
             EU,
-            "The synthesis: each country placed by how deeply territorial CO₂ emissions fell, coloured by whether the "
-            "consumption side have the same intention. Countries in red zone only moved the address of emissions, not their footprint.",
+            "The synthesis: each country placed by how deeply territorial CO₂ fell, coloured by how much of that "
+            "cut survives once consumption is counted - green genuine, bronze partial, red fake. The red ones "
+            "mostly moved the address of their emissions, not their footprint.",
             ch.build_decoupler_board(ds.get_decoupler_class()), 
             section=VERDICT
             ),
@@ -365,16 +367,9 @@ def _structure_blocks():
     city_cars = ds.get_city_cars_by_country()
     n_countries = len(city_cars)
     n_cities = int(city_cars["n_cities"].sum())
-    _verdict_key = [
-        ("genuine", "Genuine", "#14532d"), 
-        ("net_exporter", "Net exporter", "#d59a4a"),
-        ("no_decoupling", "No decoupling", "#a89e8a"),
-        ("fake", "Fake", "#c2603f"),
-        ("degrowth", "Degrowth", "#8a6d9c")
-    ]
     present = set(city_cars["verdict"])
-    car_verdict_legend = [{"color": c, "label": lbl}
-                          for key, lbl, c in _verdict_key if key in present]
+    car_verdict_legend = [{"color": ch._VERDICT_COLORS[v], "label": ch._VERDICT_LABEL[v]}
+                          for v in ch._VERDICT_ORDER if v in present]
     return [
         _chart_block(
             "median-city-cars-by-country",
@@ -382,9 +377,10 @@ def _structure_blocks():
             EU,
             "Each bar is a country's median amount of cars per 1,000 people, coloured by its decoupling "
             "verdict. As we can see, the specifics of the country affect much more than decoupling level. "
-            f"A scope caveat: Eurostat publishes city statistics for only {n_countries} of the 34 countries "
-            f"({n_cities} cities), and none of them are 'no decoupling' or 'degrowth' cases - so this "
-            "chapter tests the hypothesis on a subset of Europe, not the full set.",
+            f"A scope caveat: Eurostat publishes city car statistics for only {n_countries} of the 34 countries "
+            f"({n_cities} cities). Every verdict except degrowth shows up here, including one 'no decoupling' "
+            "case (Spain); but Austria, Ireland and Cyprus have no city data, so this chapter tests the "
+            "hypothesis on a subset of Europe, not the full set.",
             ch.build_city_cars_by_country(city_cars),
             section=HYPOTHESIS,
             legend=car_verdict_legend,
@@ -393,9 +389,9 @@ def _structure_blocks():
             "cars-distr-by-verdict",
             "Median amount of cars by decoupling verdict",
             EU,
-            "Divide each city by its country's verdict and the distributions overlap almost "
-            "entirely - genuine's median is even slightly higher, not lower than the fake one. "
-            "So, the hypothesis has not been confirmed.",
+            "Split each city by its country's verdict and every tier overlaps almost entirely - genuine, "
+            "partial and even 'no decoupling' Spain sit right on top of each other, all slightly above fake, "
+            "not below it. So the hypothesis has not been confirmed.",
             ch.build_cars_dist_by_verdict(ds.get_city_cars_snapshot()),
             section=TEST,
         ),
@@ -419,24 +415,20 @@ def _synthesis_blocks():
     RANK, ANATOMY, CAVEATS = _SEC_RANK, _SEC_ANATOMY, _SEC_CAVEATS
     tpi_2000, tpi_1990 = ds.get_tpi_leaderboard(2000), ds.get_tpi_leaderboard(1990)
 
-    # Decoupling-verdict key (mirrors charts._TPI_VERDICT_COLORS). Square swatches for the
-    # bar chart, round for the two scatter charts, so each key matches its marks.
-    _verdicts = [
-        ("Genuine", "#14532d"),
-        ("Fake", "#c2603f"),
-        ("Special", "#d59a4a"),
-        ("Other", "#a89e8a")
-    ]
-    verdict_bars = [{"color": c, "label": l} for l, c in _verdicts]
-    verdict_dots = [{"color": c, "label": l, "round": True} for l, c in _verdicts]
+    _head = tpi_2000[~tpi_2000["flag"].fillna("").str.contains("!")].sort_values("final", ascending=False).head(15)
+    _bars_present, _dots_present = set(_head["verdict"].dropna()), set(tpi_2000["verdict"].dropna())
+    verdict_bars = [{"color": ch._VERDICT_COLORS[v], "label": ch._VERDICT_LABEL[v]}
+                    for v in ch._VERDICT_ORDER if v in _bars_present]
+    verdict_dots = [{"color": ch._VERDICT_COLORS[v], "label": ch._VERDICT_LABEL[v], "round": True}
+                    for v in ch._VERDICT_ORDER if v in _dots_present]
     return [
         _toggle_block(
             "tpi-leaderboard",
             "The honest ranking: leaders by Transition Performance Index",
             EU,
-            "Sweden and Finland (genuine ones) at the top of the list, Portugal is quite a surprise here. "
-            "The clay bars are the most interesting cases - the UK, Denmark and France score well on prosperity"
-            " and emissions cut, but they're flagged as fake decouplers, so honesty pulls them down the board.",
+            "Sweden, Portugal and Finland lead - all genuine decouplers. The bronze bars just behind them "
+            "(the UK, Denmark, France) grew rich and cut emissions too, but only partially decoupled - a real "
+            "cut with part of it are offshored - so the honesty weighting keeps them out of the leading group.",
             ch.build_tpi_score(tpi_2000),
             ch.build_tpi_score(tpi_1990),
             section=RANK,
@@ -444,7 +436,7 @@ def _synthesis_blocks():
         ),
         _chart_block(
             "rank-shift",
-            "Post-Soviet recession reshaffles the ranking",
+            "Post-Soviet recession reshuffles the ranking",
             EU,
             "Lines sloping down to the right lose their rank when the base year is moved from 1990 to 2000 - "
             "their advantage was built on the early-1990s industrial collapse, not intentional policy. "

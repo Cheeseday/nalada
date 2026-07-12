@@ -50,15 +50,27 @@ def _hex_to_rgba(hex_color: str, alpha: float) -> str:
     r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
     return f"rgba({r},{g},{b},{alpha})"
 
-
-# decoupler_class verdicts (NB04) - shared by the Chapter 2 verdict board and the
-# Chapter 3 city charts, which colour cities by their country's decoupling verdict.
-_VERDICT_ORDER = ["genuine", "net_exporter", "no_decoupling", "fake", "degrowth"]
+_VERDICT_ORDER = [
+    "genuine",
+    "partial",
+    "fake",
+    "net_exporter",
+    "no_decoupling",
+    "degrowth"
+]
 _VERDICT_LABEL = {
-    "genuine": "Genuine", "net_exporter": "Net exporter",
-    "no_decoupling": "No decoupling", "fake": "Fake", "degrowth": "Degrowth",
+    "genuine": "Genuine",
+    "partial": "Partial",
+    "fake": "Fake",
+    "net_exporter": "Net exporter",
+    "no_decoupling": "No decoupling",
+    "degrowth": "Degrowth",
 }
 _VERDICT_COLORS = {
-    "genuine": ACCENT, "net_exporter": "#d59a4a",
-    "no_decoupling": "#a89e8a", "fake": WARM, "degrowth": "#8a6d9c",
+    "genuine": ACCENT,
+    "partial": "#b8923d",
+    "fake": WARM,
+    "net_exporter": "#4a6b8a",
+    "no_decoupling": "#a89e8a",
+    "degrowth": "#8a6d9c",
 }

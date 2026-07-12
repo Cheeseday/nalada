@@ -2,15 +2,9 @@
 import pandas as pd
 import plotly.graph_objects as go
 
-from ._theme import INK, ACCENT, WARM, MUTED, _apply_theme
+from ._theme import (INK, ACCENT, WARM, MUTED, _apply_theme,
+                     _VERDICT_ORDER, _VERDICT_LABEL, _VERDICT_COLORS)
 
-
-_TPI_VERDICT_COLORS = {
-    "Genuine": ACCENT,
-    "Fake":    WARM,
-    "Special": "#d59a4a",   # amber
-    "Other":   "#a89e8a",   # warm stone
-}
 
 _TPI_COMPONENT_COLORS = {
     "honesty":         ACCENT,      # pine - the 0.40 anchor
@@ -33,7 +27,8 @@ def build_tpi_score(df, top=15) -> go.Figure:
     boundary cases keep a trailing asterisk."""
     d = _tpi_headline(df).sort_values("final", ascending=False).head(top).iloc[::-1].copy()
     d["label"] = d["country"] + d["flag"].fillna("").map(lambda f: " *" if "*" in f else "")
-    d["color"] = d["verdict"].map(_TPI_VERDICT_COLORS)
+    d["color"] = d["verdict"].map(_VERDICT_COLORS)
+    d["vlabel"] = d["verdict"].map(_VERDICT_LABEL)
     d["scoretext"] = d["final"].map(lambda v: f"{v:.1f}")
 
     fig = go.Figure(go.Bar(
@@ -46,7 +41,7 @@ def build_tpi_score(df, top=15) -> go.Figure:
         text=d["scoretext"],
         textposition="outside",
         textfont=dict(size=13, color=INK),
-        customdata=d[["verdict"]],
+        customdata=d[["vlabel"]],
         hovertemplate="<b>%{y}</b><br>TPI score: %{x:.1f}<br>Verdict: %{customdata[0]}<extra></extra>",
     ))
     fig.update_layout(barcornerradius=4)
@@ -76,7 +71,8 @@ def build_rank_shift(df_2000, df_1990) -> go.Figure:
 
     fig = go.Figure()
     for _, row in shift.iterrows():
-        color = _TPI_VERDICT_COLORS.get(row["verdict"], MUTED)
+        color = _VERDICT_COLORS.get(row["verdict"], MUTED)
+        vlabel = _VERDICT_LABEL.get(row["verdict"], row["verdict"])
         fig.add_trace(go.Scatter(
             x=["1990 base", "2000 base"],
             y=[row["rank_1990"], row["rank_2000"]],
@@ -87,7 +83,7 @@ def build_rank_shift(df_2000, df_1990) -> go.Figure:
             line=dict(color=color, width=2),
             marker=dict(size=10, color=color),
             cliponaxis=False,
-            hovertemplate=(f"<b>{row['country']}</b> · {row['verdict']}"
+            hovertemplate=(f"<b>{row['country']}</b> · {vlabel}"
                            "<br>%{x}: rank %{y}<extra></extra>"),
             showlegend=False,
         ))
@@ -188,19 +184,19 @@ def build_tpi_journey(df) -> go.Figure:
         "SWE": "middle right", 
         "PRT": "middle right",
     }
-    for v in ("Genuine", "Fake", "Special", "Other"):
+    for v in _VERDICT_ORDER:
         sub = df[df["verdict"] == v]
         if sub.empty:
             continue
         fig.add_trace(go.Scatter(
-            x=sub["composite"],
+            x=sub["final"],
             y=sub["cons_latest"],
             mode="markers+text",
-            name=v,
+            name=_VERDICT_LABEL[v],
             text=sub["iso_code"],
             textposition=sub["iso_code"].map(lambda c: _TEXTPOS_OVERRIDES.get(c, "top center")),
-            textfont=dict(size=10, color=INK),
-            marker=dict(size=13, color=_TPI_VERDICT_COLORS[v], line=dict(width=1, color="#ffffff")),
+            textfont=dict(size=12, color=INK),
+            marker=dict(size=15, color=_VERDICT_COLORS[v], line=dict(width=1, color="#ffffff")),
             customdata=sub[["country"]],
             hovertemplate=("<b>%{customdata[0]}</b><br>TPI score: %{x:.1f}<br>"
                            "Consumption CO₂: %{y:.1f} t/capita<extra></extra>"),
