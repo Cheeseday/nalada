@@ -4,6 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Nalada{% endblock %}</title>
+  <meta name="description" content="{% block description %}Have 29 European countries really decoupled growth from CO₂ - or just offshored their emissions? A data investigation ending in an honesty-weighted Transition Performance Index.{% endblock %}">
+
+  {# Social share cards (LinkedIn, X, Slack). og:title / og:description reuse the page's title and description blocks. #}
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Nalada">
+  <meta property="og:title" content="{{ self.title() }}">
+  <meta property="og:description" content="{{ self.description() }}">
+  {% if request %}<meta property="og:url" content="{{ request.url }}">{% endif %}
+  {# To show an image card, add a 1200x630 PNG at static/img/og-cover.png, switch twitter:card to summary_large_image, and uncomment: #}
+  {# <meta property="og:image" content="{{ url_for('static', filename='img/og-cover.png', _external=True) }}"> #}
+
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
