@@ -1,8 +1,9 @@
 """Chapter 4 - Synthesis: the honesty-weighted Transition Performance Index and its caveats."""
+import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-from ._theme import (INK, ACCENT, WARM, MUTED, _apply_theme,
+from ._theme import (INK, ACCENT, WARM, MUTED, _apply_theme, _hex_to_rgba,
                      _VERDICT_ORDER, _VERDICT_LABEL, _VERDICT_COLORS)
 
 
@@ -255,4 +256,80 @@ def build_tpi_sufficiency(df) -> go.Figure:
         margin=dict(l=8, r=28, t=8, b=8),
         xaxis_title=None,
         yaxis_title="Annual reduction rate (%/year, positive = cutting)"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Fairness Referee 2, rendered live for the methodology chapter.
+# Reproduces NB08's weight Monte Carlo straight from the component scores stored
+# in tpi_scores - validated to match the notebook exactly at seed 42 (SWE median
+# rank 2, FIN/NOR 3, PRT 4, GBR 5). Momentum is intentionally excluded and the
+# data-quality ('!') flags are dropped, exactly as the notebook's referee does.
+# ---------------------------------------------------------------------------
+_MC_COMPONENT_COLUMNS = ["s_honesty", "s_energy", "s_abs", "s_prosperity", "s_co2"]
+
+
+def _mc_rank_samples(df, n_draws=2000, seed=42):
+    """{iso_code: array of ranks} across n_draws Dirichlet weightings of the five
+    component scores, over the headline set. Each draw scores every country as a
+    weighted average of whichever components it has (weights renormalised over the
+    present ones) and ranks them. Vectorised over all draws at once."""
+    clean = df[~df["flag"].fillna("").str.contains("!")].reset_index(drop=True)
+    scores = clean[_MC_COMPONENT_COLUMNS].to_numpy(dtype=float)
+    present = ~np.isnan(scores)
+    filled = np.where(present, scores, 0.0)
+    codes = clean["iso_code"].tolist()
+    n, k = scores.shape
+
+    rng = np.random.default_rng(seed)
+    weights = rng.dirichlet(np.ones(k), size=n_draws)
+
+    numerator = filled @ weights.T    # (n, n_draws)
+    denominator = present @ weights.T
+    composite = np.divide(numerator, denominator,
+                          out=np.full_like(numerator, np.nan), where=denominator > 0)
+
+    order = np.argsort(-composite, axis=0, kind="stable")      # rank 1 = highest composite
+    ranks = np.empty_like(order)
+    np.put_along_axis(ranks, order, np.arange(1, n + 1)[:, None], axis=0)
+
+    return {iso: ranks[i] for i, iso in enumerate(codes)}
+
+
+def build_tpi_robustness(df, top=12) -> go.Figure:
+    """Box plot: how far each contender's TPI rank travels across 2,000 random
+    weightings of the five components. A narrow box means the position barely depends
+    on the weights - the point the fairness referees are making. Boxes are coloured by
+    decoupling verdict; the rank axis is reversed so #1 sits at the top."""
+    samples = _mc_rank_samples(df)
+    medians = {iso: float(np.median(r)) for iso, r in samples.items()}
+    contenders = sorted(samples, key=lambda iso: (medians[iso], np.mean(samples[iso])))[:top]
+
+    verdict_of = dict(zip(df["iso_code"], df["verdict"]))
+    country_of = dict(zip(df["iso_code"], df["country"]))
+
+    fig = go.Figure()
+    for iso in contenders:
+        verdict = verdict_of.get(iso)
+        color = _VERDICT_COLORS.get(verdict, MUTED)
+        fig.add_trace(go.Box(
+            y=samples[iso],
+            name=iso,
+            marker_color=color,
+            line=dict(color=color, width=1.6),
+            fillcolor=_hex_to_rgba(color, 0.25),
+            boxpoints=False,
+            whiskerwidth=0.4,
+            showlegend=False,
+            hovertext=f"{country_of.get(iso, iso)} - {_VERDICT_LABEL.get(verdict, '')}",
+        ))
+    fig.update_xaxes(categoryorder="array", categoryarray=contenders)
+    return _apply_theme(
+        fig,
+        height=520,
+        margin=dict(l=8, r=20, t=8, b=28),
+        boxgap=0.45,
+        xaxis_title=None,
+        yaxis=dict(title="Rank under a random weighting (1 = best)",
+                   autorange="reversed", dtick=2, zeroline=False),
     )

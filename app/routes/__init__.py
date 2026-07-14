@@ -57,9 +57,21 @@ CHAPTERS = [
         "tagline": "The Transition Performance Index: blend of reducing trends and current state, "
         "relative indexes and absolute numbers. And the punchline.",
         "stat": "40%",
-        "stat_label": "of the score is weighted on honesty - so offshoring emissions isn't encouraged.",
+        "stat_label": "of the score is weighted on honesty, so offshoring emissions is not encouraged",
         "conclusion": ("Even European leaders are reducing emissions <span class=\"hot\">twice as slowly</span> "
                        "as needed by 2050. Being at the top <em>doesn't</em> always mean doing enough."),
+    },
+    {
+        "num": 5,
+        "slug": "methodology",
+        "title": "Methodology",
+        "scope": "🔬",
+        "scope_label": "Under the hood",
+        "tagline": "How decoupling is measured, how the honesty verdict is decided, how the Transition "
+        "Performance Index is built, weighted and stress-tested - everything is here.",
+        "stat": "6",
+        "stat_label": "independent fairness tests the ranking survived before it was trusted",
+        "conclusion": "",
     },
 ]
 CHAPTERS_BY_SLUG = {c["slug"]: c for c in CHAPTERS}
@@ -508,6 +520,10 @@ def chapter(slug):
     ch = CHAPTERS_BY_SLUG.get(slug)
     if ch is None:
         abort(404)
+    if slug == "methodology":
+        robustness = charts.build_tpi_robustness(data_service.get_tpi_leaderboard(2000))
+        return render_template('methodology.html', chapter=ch,
+                               robustness_fig_json=robustness.to_json())
     blocks = _charts_for(slug)
     template = 'chapter.html' if blocks else 'chapter_stub.html'
     return render_template(template, chapter=ch, charts=blocks,

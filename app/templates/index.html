@@ -18,7 +18,7 @@
         <a class="btn btn-primary" href="{{ url_for('main.chapter', slug='context') }}">
           Start reading <span aria-hidden="true">→</span>
         </a>
-        <a class="btn btn-ghost" href="#chapters">See all four chapters</a>
+        <a class="btn btn-ghost" href="#chapters">See all chapters</a>
       </div>
     </div>
 
@@ -76,7 +76,7 @@
 
 <section id="chapters" class="chapters">
   <div class="wrap">
-    <h2 class="section-title reveal">The four chapters</h2>
+    <h2 class="section-title reveal">Four chapters and the methodology behind them</h2>
     <div class="card-grid">
       {% for ch in chapters %}
       <a class="chapter-card reveal" data-reveal-delay="{{ loop.index0 * 90 }}"
@@ -101,31 +101,25 @@
     <div class="limits-card reveal">
       <h2>The limits of this analysis</h2>
       <p class="limits-lead">
-        This story accuses others of giving flattering reviews - so it has its caveats.
-        Before you trust one rating, there're four things to keep in mind.
+        This story accuses others of giving flattering reviews - so it owes you its own caveats.
+        Two of the biggest are below; the methodology chapter lays out all six alongside the full workings.
       </p>
       <div class="limits-grid">
         <p class="limit-item">
           <strong>Consumption figures are modelled, not measured.</strong> Consumption CO₂ is reconstructed
-          with multi-regional input-output models that estimate the CO₂ contained in trade. Models
-          inherit uncertainty from global trade tables and sector aggregation - 
-          they reflect the trend, not a precise level.
+          with multi-regional input-output models that estimate the CO₂ embodied in trade. They
+          inherit uncertainty from global trade tables and sector aggregation - they capture the trend,
+          not a precise level.
         </p>
         <p class="limit-item">
-          <strong>Small/trade-heavy economies.</strong> Ireland's profit-shifted GDP,
-          Luxembourg's cross-border workforce and tiny Malta distort per capita comparisons, so
-          I flagged or set aside them rather than ranked by objective criteria.
-        </p>
-        <p class="limit-item">
-          <strong>The scope is deliberately narrow.</strong> This is a Europe-only study - just 34
-          countries - so the sample is small and the patterns describe Europe, not the world at large.
-        </p>
-        <p class="limit-item">
-          <strong>The honesty weighting is a choice.</strong> Scoring the index 40% on honesty is 
-          a deliberate decision, not a law of nature - different weights would reshuffle the board 
-          (i suspect, not as significantly as you might imagine).
+          <strong>The honesty weighting is a choice.</strong> Scoring the index 40% on honesty is
+          a deliberate decision, not a law of nature - though the fairness tests show the leaders survive
+          very different weightings.
         </p>
       </div>
+      <a class="limits-link" href="{{ url_for('main.chapter', slug='methodology') }}">
+        Read the full methodology &amp; all six limitations <span aria-hidden="true">→</span>
+      </a>
     </div>
   </div>
 </section>

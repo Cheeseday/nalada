@@ -1,0 +1,530 @@
+{% extends 'base.html' %}
+{% block title %}Nalada. Methodology{% endblock %}
+
+{#  Chapter 5 - Methodology. Documentation, not a chart storyline: prose + tables,
+    with a single live figure (the rank-stability Monte Carlo, Referee 2).
+    Referee numbers are NB08 @ 2000 base, verified against the live tpi_scores table
+    on 2026-07-12; the box plot below is recomputed live from the same table. #}
+
+{% block content %}
+<section class="chapter-hero reveal">
+  <div class="wrap chapter-hero-grid">
+    <div class="chapter-hero-main">
+      <p class="eyebrow">Chapter {{ '%02d' % chapter.num }} · {{ chapter.scope_label }}</p>
+      <h1>{{ chapter.title }}</h1>
+      <p class="hero-lead">{{ chapter.tagline }}</p>
+    </div>
+    {% if chapter.stat %}
+    <div class="chapter-stat">
+      <div class="chapter-stat-num">{{ chapter.stat }}</div>
+      {% if chapter.stat_label %}<p class="chapter-stat-label">{{ chapter.stat_label }}</p>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<div class="wrap chapter-body">
+  <p class="chapter-intro reveal">
+    Everything scored on the site is reproducible from three public datasets - Our World in Data, the World 
+    Bank and Eurostat. The analysis notebooks in this project as well as every subjective choice (which 
+    metric, which weight, which threshold) is written down here so you can disagree with it precisely.
+  </p>
+  <p class="chapter-intro reveal">
+    There are two key principles at work. First, <strong>consumption-based accounting is the foundation</strong>: a country's 
+    real carbon emissions are measured by what its residents ultimately consume, wherever they are produced, 
+    not just what its domestic factories emit. Second, the scoring is <strong>criteria-based</strong> - measured against fixed, 
+    real-world anchors, rather than against the other countries, so the score means the same thing no matter 
+    who else is in the table.
+  </p>
+  <p class="chapter-intro reveal" style="margin-top:-0.6rem;">
+    The decoupling question itself isn't new: <a href="https://ourworldindata.org/co2-gdp-decoupling"
+    target="_blank" rel="noopener">Our World in Data</a> found that many rich countries cut emissions
+    even after accounting for trade. Nalada's contribution is to turn that finding into something
+    <em>measurable and verifiable</em> - a per-country honesty verdict and a composite index that must pass a series 
+    of robustness tests before it can be trusted.
+  </p>
+
+  <!--  01. TAPIO -->
+  <section class="chapter-section">
+    <div class="section-head reveal">
+      <span class="section-num">01</span>
+      <div class="section-head-body">
+        <h2>Measuring decoupling: the Tapio model</h2>
+        <p class="section-intro">Chapter 2 begins with the flattering lens - a standard method that
+          asks whether economic growth and emissions have come apart, but only within country borders.</p>
+      </div>
+    </div>
+
+    <div class="doc-prose reveal">
+      <p>
+        The decoupling map in Chapter 2 uses the <strong>Tapio decoupling model</strong>, introduced by 
+        Finnish researcher Petri Tapio in 2005. It measures a <em>decoupling elasticity</em> - the
+        ratio between the percentage change in an environmental pressure and the percentage change in the
+        economic driver over the same period:
+      </p>
+      <p class="doc-formula">elasticity&nbsp;=&nbsp;(%&nbsp;change in CO₂)&nbsp;÷&nbsp;(%&nbsp;change in GDP)</p>
+      <p>
+        Read it this way: for every percent the economy grew, how did emissions respond? Tapio split the
+        continuum into eight stages; this project uses the four stages, that carry the GDP vs CO₂ story:
+      </p>
+      <ul class="doc-list">
+        <li><strong>Strong decoupling</strong> - GDP rises while CO₂ falls (elasticity below 0). The goal.</li>
+        <li><strong>Weak decoupling</strong> - both rise, but emissions more slowly (elasticity 0 to 0.8).</li>
+        <li><strong>Coupling</strong> - emissions growth roughly corresponds to GDP growth (elasticity 0.8 to 1.2).</li>
+        <li><strong>Recession</strong> - the economy shrank, so any emissions reduction is not counted as progress.</li>
+      </ul>
+      <p>
+        On the elasticity map, the bottom-right quadrant is strong decoupling: GDP up, territorial CO₂ down.
+        Romania is the vivid case: its economy almost quadrupled since 1990 while territorial CO₂ more than
+        halved - an elasticity far below zero, one of the deepest strong-decoupling readings in Europe.
+        But the Tapio model only sees <em>territorial</em> emissions - what a country burns within its 
+        borders. It cannot tell a country that genuinely reduced its carbon footprint from one that simply moved its
+        factories abroad. That "blind spot" is exactly what the next step corrects.
+      </p>
+      <p class="doc-ref">
+        Method: Tapio, P. (2005). <a href="https://doi.org/10.1016/j.tranpol.2005.01.001" target="_blank"
+        rel="noopener">Towards a theory of decoupling: degrees of decoupling in the EU and the case of road
+        traffic in Finland between 1970 and 2001</a>. <em>Transport Policy</em>, 12(2), 137-151.
+      </p>
+    </div>
+  </section>
+
+  <!-- 02. VERDICT -->
+  <section class="chapter-section">
+    <div class="section-head reveal">
+      <span class="section-num">02</span>
+      <div class="section-head-body">
+        <h2>The honesty verdict: genuine, partial or fake</h2>
+        <p class="section-intro">Turning the territorial picture into a judgement about who actually
+          decoupled - the classifier that Chapters 2, 3 and 4 all read from.</p>
+      </div>
+    </div>
+
+    <div class="doc-prose reveal">
+      <p>
+        Because the Tapio lens is territorial, a country can look decoupled simply by importing the things it
+        used to make. The verdict fixes this with a single transparent ratio - the <strong>real-share</strong>
+        of a country's reported cut. Both curves are indexed to 1990 = 100 and read at the latest year:
+      </p>
+      <p class="doc-formula">
+        real-share&nbsp;=&nbsp;(100&nbsp;-&nbsp;consumption index)&nbsp;÷&nbsp;(100&nbsp;-&nbsp;territorial index)
+      </p>
+      <p>
+        In words: for every ton of territorial CO₂ a country reports cutting, how much is backed by a real
+        reduction in consumption by its population? A ratio of 1.0 means the footprint fell just as much as the
+        reported number; a ratio near 0 means the reported cut mostly moved abroad. The verdict then follows a
+        short decision tree - first match wins:
+      </p>
+      <ol class="doc-list doc-list--ol">
+        <li>GDP didn't grow (index&nbsp;≤&nbsp;100) → <strong>degrowth</strong> (e.g. Ukraine) - there's no growth to decouple from.</li>
+        <li>The country exports more embedded CO₂ than it imports (trade share&nbsp;&lt;&nbsp;0) → <strong>net exporter</strong> (Poland).</li>
+        <li>Territorial emissions barely moved (index&nbsp;≥&nbsp;95) → <strong>no decoupling</strong> (Austria, Spain, Cyprus, Ireland).</li>
+        <li>Otherwise, on the real-share: ≥&nbsp;0.70 → <strong>genuine</strong>; 0.30 to 0.70 → <strong>partial</strong>; below&nbsp;0.30 → <strong>fake</strong>.</li>
+      </ol>
+      <p>
+        The two thresholds aren't round numbers: 0.70 and 0.30 both fall within natural gaps in the data
+        (the countries cluster at 0.64 then jump to 0.79, and at 0.19 then jump to 0.41), so the split barely
+        moves even if you slightly altered thresholds. The result across the 34 countries is <strong>15 genuine, 6 partial,
+        7 fake, 4 no-decoupling, 1 net exporter and 1 degrowth</strong>. This classification is built once (in
+        notebook 04) and stored in one table, so Chapter 2's verdict board, city analysis in Chapter 3 and
+        leaderboard in Chapter 4 all use the same language.
+      </p>
+      <p>
+        Let me demonstrate three countries that make the ratio concrete. Germany's territorial emissions drop to 63% of their
+        level in 1990 and its consumption drop to 64% - a real-share of 0.98, so nearly the whole reported cut is backed by a
+        genuine fall in what Germans consume (<strong>genuine</strong>). Sweden's consumption dropped even faster
+        than its territorial number, a real-share above 1.2 - the clear example of a country actually reducing its footprint 
+        rather than exporting it. Switzerland is a mirror image: its territorial emissions look admirable, but its 
+        residents consume so much more than the country produces that the ratio turns sharply negative (<strong>fake</strong>).
+      </p>
+    </div>
+  </section>
+
+  <!-- 03. TPI -->
+  <section class="chapter-section">
+    <div class="section-head reveal">
+      <span class="section-num">03</span>
+      <div class="section-head-body">
+        <h2>The Transition Performance Index</h2>
+        <p class="section-intro">The key score. What it measures, how the five components are weighted,
+          and - above all - why honesty matters almost as much as everything else combined.</p>
+      </div>
+    </div>
+
+    <aside class="prior-art reveal">
+      <h4>A note on the name</h4>
+      <p>
+        The European Commission's Joint Research Centre publishes an official composite index also called the
+        <a href="https://research-and-innovation.ec.europa.eu/strategy/support-policy-making/support-national-research-and-innovation-policy-making/transitions-performance-index-tpi_en"
+        target="_blank" rel="noopener">Transitions Performance Index</a> - 28 indicators across economic,
+        social, environmental and governance dimensions, covering the EU and 45 other countries. Nalada's TPI
+        is an independent, far smaller-scope index with a different construction (Europe-only, weighted heavily
+        on consumption honesty, and published with its own self-audit) and is <strong>not affiliated with or
+        derived from it</strong>. The shared name is a collision of two obvious words.
+      </p>
+    </aside>
+
+    <div class="doc-prose reveal">
+      <p>
+        The TPI ranks European countries on a scale from 0 to 100 based on how well they combine an <em>honest, consumption-based
+        emissions reductions</em> with a clean energy grid, low absolute footprint and real prosperity. It blends emission reduction 
+        <em>trends</em> (how fast emissions fell) with current <em>states</em> (where a country stands today), because a fast 
+        cutter that still consumes 12 tonnes per capita has not finished the job.
+      </p>
+
+      <h3 class="doc-h3">Components and weights</h3>
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>Component</th><th>Weight</th><th>What it captures</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Honesty</strong></td>
+              <td class="doc-w doc-w--hot">0.40</td>
+              <td>Consumption-CO₂ reduction per capita (a 60/40 blend of the long-run and since-2010 cuts)
+                <em>minus</em> a penalty when territorial emissions decline significantly faster than consumption. May become negative.</td>
+            </tr>
+            <tr>
+              <td>Grid energy cleanliness</td>
+              <td class="doc-w">0.15</td>
+              <td>Carbon intensity of energy today (kg CO₂/kWh) - encourages the drive for <em>sustainability</em>.</td>
+            </tr>
+            <tr>
+              <td>Absolute footprint</td>
+              <td class="doc-w">0.15</td>
+              <td>Consumption CO₂ per capita now versus the destination, measured using a 2-tonne fair share.</td>
+            </tr>
+            <tr>
+              <td>Prosperity</td>
+              <td class="doc-w">0.15</td>
+              <td>60% absolute GDP/capita + 40% a positive-growth guard (only shrinking economies lose points).</td>
+            </tr>
+            <tr>
+              <td>Territorial cut</td>
+              <td class="doc-w">0.15</td>
+              <td>The classic headline reduction in territorial CO₂ per capita from the base year.</td>
+            </tr>
+            <tr class="doc-table-modifier">
+              <td>Momentum</td>
+              <td class="doc-w">±3 pct</td>
+              <td>A small modifier (not a weight) for the recent consumption trend. Added after weighting.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="doc-h3">Why honesty is 0.40</h3>
+      <p>
+        This is the most consequential decision in the project, and it follows straight from the project's
+        thesis. If you build a climate league table based on territorial emissions only, you <em>reward offshoring</em>:
+        a country that closes a steel mill and imports the steel looks cleaner, even though the same
+        tonne of CO₂ is now emitted somewhere else on its behalf. Paying 40% of the score for honesty makes that
+        trick unprofitable. The component measures the reduction in <em>consumption-based</em> CO₂ per
+        capita - the number that follows the imports - and then subtracts a penalty if a country's
+        territorial curve has dropped far faster than its consumption curve, which is the statistical sign
+        of offshoring. It's the only component that can be <em>negative</em>, because dishonesty must actively cost the 
+        country a position. Switzerland is the test case: its territorial emissions look admirable, but its residents 
+        consume roughly three times than the country emits, so its honesty rating is deeply negative and it drops the 
+        country from a spotless reputation to around rank 30.
+      </p>
+      <p>
+        This weighting factor is deliberately assertive, but don't be too quick to think that it creates an artificial 
+        index - the results of the fairness referees tests tell us that the coefficients only clarify the story, and the 
+        leaders remain leaders no matter what.
+      </p>
+
+      <h3 class="doc-h3">Why the other four are 0.15 each</h3>
+      <p>
+        The remaining 0.60 is split evenly across four components, each guarding against a specific way the index
+        might reward the wrong thing:
+      </p>
+      <ul class="doc-list">
+        <li><strong>Grid cleanliness</strong> scores the grid's <em>absolute</em> intensity, not its improvement,
+          so an already-clean country (Norway, France, Sweden) isn't punished for having no easy gains left.</li>
+        <li><strong>Absolute footprint</strong> is the destination to decoupling's journey: a country can decouple
+          beautifully and still consume far too much, and this component says so.</li>
+        <li><strong>Prosperity</strong> uses a growth <em>guard</em> rather than a growth reward - any positive
+          growth earns full marks, only a shrinking economy loses points - which kills the "catch-up jackpot"
+          that would otherwise hand post-communist GDP collapses a high score.</li>
+        <li><strong>Territorial cut</strong> still must be in the index - it's the number governments report and
+          citizens recognise - but at 0.15 it can no longer carry the whole story by its own.</li>
+      </ul>
+
+      <h3 class="doc-h3">Three more rules that keep it fair</h3>
+      <ul class="doc-list">
+        <li><strong>Per capita, everywhere.</strong> This takes into account the sharp population decline in Eastern Europe.
+          So, the reducion in total emissions is not due to emigration.</li>
+        <li><strong>Two base years, side by side.</strong> 2000 is the headline - a fair fight for all of Europe, 
+          while 1990 is shown as a contrast because it hands the post-Soviet economies a sort of profit from the
+          early-1990s industrial collapse. Those economies rise above 1990 base and fall above the 2000 one, and
+          the distance they fall is a measure of how much of their early "progress" was really the collapse of
+          Soviet-era heavy industry rather than deliberate policy. The <em>shift</em> between the two rankings is
+          itself a finding.</li>
+        <li><strong>Missing data renormalises.</strong> Weights are redistributed based on a country's actual presence.
+          a country needs at least a territorial reduction and an absolute footprint to be ranked. Where
+          consumption data starts late (Norway, 2003), honesty is measured from that year for <em>both</em>
+          curves, so the offshoring comparison remains consistent.</li>
+      </ul>
+
+      <h3 class="doc-h3">Flags, and two things I deliberately leave behind</h3>
+      <ul class="doc-list">
+        <li><strong><span class="flag-mark">!</span> data-quality</strong> (Ireland, Luxembourg, Malta) - the
+          inputs themselves are distorted: Irish GDP is inflated by multinational profit-shifting, Luxembourg's
+          per-capita denominators are broken by cross-border workers, Malta is tiny and volatile. These countries 
+          was excluded from the headline ranking, although was shown in the full one.</li>
+        <li><strong><span class="flag-mark">*</span> accounting boundary</strong> (Norway) - the data is accurate
+          but the frame is kind: the emissions from Norway's exported oil and gas are burned abroad, outside both
+          territorial <em>and</em> consumption accounting. Norway remains in the ranking, at least until the data 
+          can be counted fairly.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 04. ANCHORS -->
+  <section class="chapter-section">
+    <div class="section-head reveal">
+      <span class="section-num">04</span>
+      <div class="section-head-body">
+        <h2>The anchors, and why these numbers</h2>
+        <p class="section-intro">A criteria-based scoring needs fixed criteria. Each component is scored
+          on a scale from 0 to 100 using two real-world anchors chosen from physics and policy.</p>
+      </div>
+    </div>
+
+    <div class="doc-prose reveal">
+      <p>
+        The anchors don't move when the sample changes, adding or removing a country never reshuffles anyone else's 
+        score. Many league tables do the opposite and normalise the data against the sample, grading each country 
+        relative to the best and worst performers in a sample; the
+        leader is then marked on a curve, and the entire table can be shuffled when a country is added or
+        removed. Fixed anchors helps to avoid that situation -  a 55% cut is worth the same in a field of ten countries or fifty.
+      </p>
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>Component</th><th>0 points</th><th>100 points</th><th>Why these anchors</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Territorial cut</td><td>0%</td><td>-55%</td>
+              <td>The EU's Fit-for-55 target: a 55% cut is "full marks" by policy design.</td>
+            </tr>
+            <tr>
+              <td>Consumption cut (long-run)</td><td>0%</td><td>-45%</td>
+              <td>Treated as about as demanding as a 55% territorial cut - consumption includes imports, so it's harder to move.</td>
+            </tr>
+            <tr>
+              <td>Consumption cut (since 2010)</td><td>0%</td><td>-30%</td>
+              <!-- <td>The recent slice of the honesty blend - a steeper bar over a shorter, policy-relevant window.</td> -->
+              <td>Higher demands in a shorter time frame, so, threshold is lower.</td>
+            </tr>
+            <tr>
+              <td>Fake-decoupling penalty</td><td>0 pts</td><td>-60 pts</td>
+              <td>Scales over a 0-60% gap between the territorial and consumption curves. A 60-point divergence is treated as maximal offshoring.</td>
+            </tr>
+            <tr>
+              <td>Absolute footprint</td><td>16 t/cap</td><td>2 t/cap</td>
+              <td>2 tonnes is the Paris-compatible fair share by 2050,  16 tonnes is a heavy high-consumption economy.</td>
+            </tr>
+            <tr>
+              <td>Grid cleanliness</td><td>0.30 kg/kWh</td><td>0.03 kg/kWh</td>
+              <td>0.30 ≈ a coal-fired energy system, 0.03 ≈ near-zero-carbon aim.</td>
+            </tr>
+            <tr>
+              <td>Prosperity - GDP</td><td>$15k</td><td>$60k</td>
+              <td>Covers lower-middle to high-income European countries.</td>
+            </tr>
+            <tr>
+              <td>Prosperity - growth guard</td><td>-30%</td><td>0%</td>
+              <td>Only economies that have contracted lose points. Any growth economies brings full guard.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="doc-note">
+        Honesty itself is a combination of 60% of the long-run consumption reduction and 40% of the since-2010 reduction, 
+        minus fake-decoupling penalty - that's why it can end up below zero.
+      </p>
+    </div>
+  </section>
+
+  <!-- 05. REFEREES -->
+  <section class="chapter-section">
+    <div class="section-head reveal">
+      <span class="section-num">05</span>
+      <div class="section-head-body">
+        <h2>Six fairness referees</h2>
+        <p class="section-intro">A composite index is a stack of subjective choices - which components, how to
+          weight them, where to put each anchor, how much to trust noisy inputs. These tests allow you to 
+          verify the relevance of the rating.</p>
+      </div>
+    </div>
+
+    <div class="doc-prose reveal">
+      <div class="doc-table-wrap">
+        <table class="doc-table doc-table--referee">
+          <thead>
+            <tr><th>#</th><th>Referee</th><th>What it stress-tests</th><th>What it found</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td><td><strong>Named scenarios</strong></td>
+              <td>Six deliberate weightings (equal, honesty-heavy, destination-, prosperity- and reduction-heavy).</td>
+              <td>Sweden, Portugal and Finland stay in the top three under every one; rank ranges are tight (Sweden 
+                moves by ±1, the UK by ±1).</td>
+            </tr>
+            <tr>
+              <td>2</td><td><strong>Weight Monte Carlo</strong></td>
+              <td>2,000 fully random weightings</td>
+              <td>Sweden holds a top-5 place in <strong>99.9%</strong> of them. Finland, Norway, Portugal are most 
+                often in the top 5. The chart below ilustrates top-12.</td>
+            </tr>
+            <tr>
+              <td>3</td><td><strong>Rank correlation + leave-one-out</strong></td>
+              <td>Drops each component entirely and re-ranks; compares to the normative order.</td>
+              <td>Orders stay near-identical (mean Spearman <strong>0.93</strong>). Only removing honesty moves things 
+                much (ρ&nbsp;0.75) - it confirms honesty is the most significant component by design.</td>
+            </tr>
+            <tr>
+              <td>4</td><td><strong>Threshold jitter</strong></td>
+              <td>Every anchor jittered ±15%, 200 full rebuilds.</td>
+              <td>The same five leaders stay in the top 5 in <strong>100%</strong> of runs - robust to the anchors as well as the weights.</td>
+            </tr>
+            <tr>
+              <td>5</td><td><strong>Component redundancy</strong></td>
+              <td>Correlation between five component scores.</td>
+              <td>The strongest pair correlates at r&nbsp;=&nbsp;<strong>0.56</strong> - it's below the 0.6 double-counting line, so each component measures different things.</td>
+            </tr>
+            <tr>
+              <td>6</td><td><strong>Input-noise propagation</strong></td>
+              <td>Consumption ±12% systematic + ±5% yearly, territorial ±3%. 300 rebuilds. Varies the data.</td>
+              <td>Scores come out as 95% confidence bands with rank intervals. Sweden leads at 83.1, but Portugal, Finland, Norway, the UK, Estonia and Denmark all overlap it - so the honest headline is a leading <strong>group</strong>, not a single #1.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Two of these results are worth reading together. Referee 3 shows the order barely moves unless you remove
+        honesty - which is the design working as intended, not a fault, because honesty is <em>meant</em> to be
+        essential. And Referee 6 is why I never crowns a single winner: where the confidence bands
+        overlap, the honest reading is a tie, so "a leading group" is a claim the numbers support and "Sweden is
+        number one" is not.
+      </p>
+
+      <h3 class="doc-h3">Referee 2, drawn</h3>
+      <p>
+        Each box below is where a country landed across all 2,000 random weightings. A narrow box means the
+        position barely moves no matter how you weight the five components; a long tail means the country only
+        ranks high under weightings that happen to flatter it. Sweden's box is a sliver around rank 2; the
+        genuine decouplers cluster at the top and stay there.
+      </p>
+      <figure class="chart-block reveal">
+        <div class="chart-surface">
+          <div class="chart js-plot" data-plot="fig-tpi-robustness"></div>
+          <script type="application/json" id="fig-tpi-robustness">{{ robustness_fig_json | safe }}</script>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-swatch" style="background:#14532d"></span>Genuine decoupler</span>
+            <span class="legend-item"><span class="legend-swatch" style="background:#b8923d"></span>Partial</span>
+            <span class="legend-item"><span class="legend-swatch" style="background:#c2603f"></span>Fake</span>
+            <span class="legend-item"><span class="legend-swatch" style="background:#a89e8a"></span>No decoupling</span>
+          </div>
+        </div>
+        <figcaption class="chart-takeaway">
+          <span class="takeaway-kicker">How to read it</span>
+          <p>Rank axis is reversed, so #1 sits at the top. Boxes are coloured by each country's Chapter&nbsp;2
+            decoupling verdict - the point being that the robust leaders are also the genuine ones.</p>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 06. LIMITATIONS -->
+  <section class="chapter-section">
+    <div class="section-head reveal">
+      <span class="section-num">06</span>
+      <div class="section-head-body">
+        <h2>The limits of this analysis</h2>
+        <p class="section-intro">This story accuses others of flattering reviews, so it owes you its own
+          caveats. Six things to keep in mind before trusting any single number.</p>
+      </div>
+    </div>
+
+    <div class="limits-grid reveal">
+      <p class="limit-item">
+        <strong>Consumption figures are modelled.</strong> Consumption CO₂ is reconstructed with
+        multi-regional input-output models that estimate the carbon embodied in trade. They inherit uncertainty
+        from global trade tables and sector aggregation - they capture the trend, not a precise level. Referee 6
+        exists precisely to propagate this.
+      </p>
+      <p class="limit-item">
+        <strong>Europe is the easy case.</strong> The continent is deindustrialised and import-heavy, so it is
+        primed to look good on a consumption lens. Without non-European comparators, the index cannot rule out
+        that the whole leaderboard is successful offshoring at scale - the honest limit of a Europe-only study.
+      </p>
+      <p class="limit-item">
+        <strong>Small and trade-heavy economies are just set aside.</strong> Ireland's profit-shifted GDP,
+        Luxembourg's cross-border workforce and tiny Malta distort per-capita comparisons, so they are flagged
+        and held out of the headline rather than ranked as if the numbers were clean.
+      </p>
+      <p class="limit-item">
+        <strong>The honesty weighting is a choice.</strong> Scoring 40% on honesty is a deliberate decision, not
+        a law of nature - though the referees show the leaders survive very different weightings, so it shapes
+        the emphasis more than the winners.
+      </p>
+      <p class="limit-item">
+        <strong>Bunker fuels and land use are not included.</strong> International aviation and shipping, and land-use (LULUCF)
+        emissions, are excluded because the standard consumption dataset doesn't include them. It is a real gap 
+        for both countries with developed aviation industries and countries with rich forest resources.
+      </p>
+      <p class="limit-item">
+        <strong>A per-capita lens.</strong> Every score is per person, which is fairer to citizens but understates
+        the overall level of emissions from a particular country, so a big, moderately efficient nation can outscore a 
+        small, heavy-footprint one.
+      </p>
+    </div>
+  </section>
+
+  <!-- 07. HOW TO READ -->
+  <section class="chapter-section">
+    <div class="section-head reveal">
+      <span class="section-num">07</span>
+      <div class="section-head-body">
+        <h2>How to read the result</h2>
+      </div>
+    </div>
+    <div class="doc-prose reveal">
+      <p>The defensible summary is not "Country X is number one." It is this:</p>
+      <blockquote class="doc-quote">
+        A leading group - stable across 2,000 random weightings, ±15% anchor jitter and propagated input noise -
+        clearly outperforms the rest of Europe on honest transition metrics; and even that group is not yet
+        cutting consumption emissions at a Paris-compatible pace.
+      </blockquote>
+      <p>
+        That is a narrower claim than a single winner, and a more honest one. It is what the numbers will actually
+        bear - and holding the conclusion to what the numbers bear is the whole point of this chapter. It also
+        keeps the sufficiency punchline in view: being the best-governed transition in Europe and being on track
+        for a liveable climate are two different tests, and this index only measures the first.
+      </p>
+    </div>
+  </section>
+
+  {# ---- Prev / next pager ---- #}
+  <nav class="chapter-pager reveal" aria-label="Chapter navigation">
+    <a class="pager-link prev" href="{{ url_for('main.chapter', slug='synthesis') }}">
+      <span class="pager-dir">← Previous</span>
+      <span class="pager-target"><span class="num">04</span><span class="title">Synthesis</span></span>
+    </a>
+    <a class="pager-link next" href="{{ url_for('main.index') }}">
+      <span class="pager-dir">Back to ↑</span>
+      <span class="pager-target"><span class="title">Overview</span></span>
+    </a>
+  </nav>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}

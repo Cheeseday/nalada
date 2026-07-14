@@ -38,6 +38,7 @@ from .synthesis import (
     build_tpi_weighted_contribution,
     build_tpi_journey,
     build_tpi_sufficiency,
+    build_tpi_robustness,
 )
 
 __all__ = [
@@ -59,9 +60,11 @@ __all__ = [
     "build_cars_dist_by_verdict",
     "build_cars_by_size_band",
     # Chapter 4 - Synthesis
-    "build_tpi_score", 
-    "build_rank_shift", 
+    "build_tpi_score",
+    "build_rank_shift",
     "build_tpi_weighted_contribution",
-    "build_tpi_journey", 
+    "build_tpi_journey",
     "build_tpi_sufficiency",
+    # Chapter 5 - Methodology
+    "build_tpi_robustness",
 ]

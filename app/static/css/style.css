@@ -372,6 +372,10 @@ a:hover {
   gap: 0.22rem;
 }
 
+@media (max-width: 580px) {
+  .glance-row { flex-direction: column; }
+}
+
 .glance-k {
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -431,6 +435,16 @@ a:hover {
 
 .limit-item strong { color: var(--ink); }
 
+.limits-link {
+  display: inline-block;
+  margin-top: 1.4rem;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.94rem;
+}
+
+.limits-link:hover { color: var(--accent-hover); }
+
 @media (max-width: 680px) {
   .limits-grid { grid-template-columns: 1fr; }
 }
@@ -449,8 +463,16 @@ a:hover {
 
 .card-grid {
   display: grid;
-  gap: 1.1rem;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.6rem;
+  grid-template-columns: repeat(3, 1fr);   /* max 3 chapter cards per row */
+}
+
+@media (max-width: 860px) {
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 560px) {
+  .card-grid { grid-template-columns: 1fr; }
 }
 
 .chapter-card {
@@ -1047,6 +1069,229 @@ a:hover {
   color: var(--muted-2);
 }
 
+  /* Chapter 5 - Methodology
+  Prose + tables, reuses the chapter-hero,
+  chapter-section and section-head scaffolding from the editorial pages. */
+.doc-prose {
+  max-width: 86ch;
+}
+
+.doc-prose > p {
+  margin: 0 0 1.15rem;
+  color: var(--ink-body);
+  font-size: 1.02rem;
+  line-height: 1.68;
+}
+
+.doc-prose > p:last-child {
+  margin-bottom: 0;
+}
+
+.doc-prose strong {
+  color: var(--ink);
+}
+
+.doc-prose em {
+  font-style: italic;
+}
+
+.doc-h3 {
+  margin: 2.3rem 0 0.85rem;
+  font-size: 1.12rem;
+  letter-spacing: -0.01em;
+  color: var(--accent);
+}
+
+/* formula / definition callout (two classes, so it beats `.doc-prose > p`) */
+.doc-prose .doc-formula {
+  margin: 0 0 1.15rem;
+  padding: 0.9rem 1.1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  font-size: 1.04rem;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.doc-list {
+  margin: 0 0 1.2rem;
+  padding-left: 1.2rem;
+  color: var(--ink-body);
+  font-size: 1.02rem;
+  line-height: 1.62;
+}
+
+.doc-list li {
+  margin-bottom: 0.55rem;
+}
+
+.doc-list li:last-child {
+  margin-bottom: 0;
+}
+
+.doc-list strong {
+  color: var(--ink);
+}
+
+.doc-prose .doc-ref,
+.doc-prose .doc-note {
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.doc-prose .doc-ref {
+  border-top: 1px solid var(--border);
+  padding-top: 0.9rem;
+  margin-top: 0.4rem;
+}
+
+.doc-prose .doc-note {
+  font-style: italic;
+}
+
+.doc-prose .doc-ref a {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ---------- Documentation tables ---------- */
+.doc-table-wrap {
+  overflow-x: auto;
+  margin: 0 0 1.3rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.94rem;
+  min-width: 560px;
+}
+
+.doc-table thead th {
+  text-align: left;
+  padding: 0.8rem 1rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--accent);
+  background: #eef3ea;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.doc-table tbody td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink-body);
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.doc-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.doc-table td strong {
+  color: var(--ink);
+}
+
+.doc-w {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.doc-w--hot {
+  color: var(--accent);
+  font-size: 1.06rem;
+}
+
+.doc-table-modifier td {
+  background: #faf7ee;
+  color: var(--muted);
+}
+
+.doc-table-modifier td strong {
+  color: var(--ink-soft);
+}
+
+.doc-table--referee td:first-child,
+.doc-table--referee th:first-child {
+  width: 2.2rem;
+  text-align: center;
+  font-weight: 800;
+  color: var(--num-sand);
+}
+
+/* ---------- Prior-art callout (the EU-TPI name note) ---------- */
+.prior-art {
+  background: #fbf6ec;
+  border: 1px solid var(--border-2);
+  border-left: 4px solid var(--amber);
+  border-radius: var(--radius);
+  padding: 1.2rem 1.4rem;
+  margin: 0 0 1.7rem;
+  max-width: 74ch;
+  box-shadow: var(--shadow);
+}
+
+.prior-art h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #9a6a24;
+}
+
+.prior-art p {
+  margin: 0;
+  color: var(--ink-body);
+  font-size: 0.96rem;
+  line-height: 1.6;
+}
+
+.prior-art strong {
+  color: var(--ink);
+}
+
+/* inline data-quality / boundary flag marks */
+.flag-mark {
+  display: inline-block;
+  min-width: 1.3em;
+  text-align: center;
+  font-weight: 800;
+  color: var(--clay);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Closing quote (dark finale panel) ---------- */
+.doc-quote {
+  margin: 1.3rem 0;
+  padding: 1.2rem 1.5rem;
+  background: var(--panel-dark);
+  color: var(--panel-dark-ink);
+  border-radius: var(--radius-lg);
+  font-size: 1.12rem;
+  line-height: 1.5;
+  font-weight: 500;
+  box-shadow: var(--shadow-dark);
+  max-width: 68ch;
+}
+
+@media (max-width: 680px) {
+  .doc-prose .doc-formula { font-size: 0.94rem; }
+}
+
 /* ---------- Chapter stub (not-yet-built chapters) ---------- */
 .placeholder {
   background: var(--surface);
@@ -1069,6 +1314,17 @@ a:hover {
 }
 
 /* ---------- Responsive ---------- */
+@media (max-width: 850px) {
+  .nav-title {
+    display: none;
+  }
+
+  .nav-link.is-active .nav-title {
+    display: inline;
+  }
+}
+
+
 @media (max-width: 640px) {
   .header-inner {
     flex-direction: column;
@@ -1079,14 +1335,6 @@ a:hover {
 
   .nav-link {
     padding: 0.35rem 0.55rem; }
-
-  .nav-title {
-    display: none;
-  }
-
-  .nav-link.is-active .nav-title {
-    display: inline;
-  }
 
   .chapter-pager {
     grid-template-columns: 1fr;
