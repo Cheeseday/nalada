@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Nalada</title>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="7" fill="#f5f1e8" stroke="#e2d9c6" stroke-width="1"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.4">
+    <polyline points="6,20.5 16,15 26,9.5" stroke="#14532d"/>
+    <polyline points="6,12 16,16.8 26,22.5" stroke="#c2603f"/>
+  </g>
+</svg>
