@@ -1,11 +1,12 @@
 """
 Shared pytest setup.
 
-The data_service tests are *integration* tests - they run real SQL against the
-Postgres DB. This conftest:
+Some tests are *integration* tests - they run real SQL against the Postgres DB
+and carry @pytest.mark.integration. This conftest:
   1. puts the project root on sys.path (so `from db... import` works under pytest), and
-  2. skips every test if the database isn't reachable, so the suite degrades
-     gracefully on a machine without the DB instead of erroring out.
+  2. skips the integration-marked tests when the database isn't reachable, so the
+     suite degrades gracefully on a machine without the DB. Unit tests run anyway;
+     select them in CI with  pytest -m "not integration".
 """
 import sys
 import os
@@ -34,7 +35,7 @@ def _db_available() -> bool:
 
 
 @pytest.fixture(autouse=True)
-def require_db():
-    """Skip any test that needs the database when it isn't reachable."""
-    if not _db_available():
-        pytest.skip("Database not reachable - skipping integration tests")
+def require_db(request):
+    """Skip DB-marked tests when the database isn't reachable."""
+    if request.node.get_closest_marker("integration") and not _db_available():
+        pytest.skip("Database not reachable - skipping integration test")
