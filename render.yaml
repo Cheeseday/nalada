@@ -1,0 +1,18 @@
+# Render Blueprint - https://render.com/docs/blueprint-spec
+# One web service; the database is external (Neon). To deploy: Render dashboard →
+# New → Blueprint → pick this repo, then set DATABASE_URL (your Neon connection
+# string) in the service's Environment tab before the first boot.
+services:
+  - type: web
+    name: nalada
+    runtime: python
+    plan: free                     # free web service (sleeps after ~15 min idle, cold-starts on next hit)
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DATABASE_URL          # your Neon connection string - set as a secret in the dashboard, not in git
+        sync: false
+      - key: FLASK_ENV
+        value: production          # Config.DEBUG = False → no SQL echo in production logs
+      - key: PYTHON_VERSION
+        value: "3.11"              # match the cp311 wheels pinned in requirements.txt
