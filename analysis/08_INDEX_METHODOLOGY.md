@@ -19,7 +19,7 @@ Two design principles:
 | **Energy cleanliness** | 0.15 | Absolute current grid intensity (kg CO2/kWh) - rewards *being* clean, not just getting cleaner | 0.30 (coal grid) - 0.03 (near-zero-carbon, looks like a good aim for modern society) |
 | **Absolute consumption** | 0.15 | Consumption CO2/capita today - it's about destination and 2 tonnes is a good aim as well | 16 t - 2 t |
 | **Prosperity** | 0.15 | 60% absolute GDP/capita + 40% growth *guard* (full marks for any positive growth; only shrinking economies lose points - it kills the post-communist deindustrialization pit) | GDP $15k -> $60k; growth −30% -> 0% |
-| **Territorial reduction** | 0.15 | Classic headline cut in CO2/capita from base year | 0% -> 60% (~ EU Fit-for-55 ambition) |
+| **Territorial reduction** | 0.15 | Classic headline cut in CO2/capita from base year | 0% -> 55% (~ EU Fit-for-55 ambition) |
 
 Plus a **momentum modifier** (±3 pts on top): smoothed consumption-CO2 slope 2010->latest. Small by design - a tiebreaker, not a driver.
 
